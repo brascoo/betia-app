@@ -931,7 +931,10 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown
       body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
     
-    if (!res.ok) throw new Error('Error en la API. Verifica que tu API Key sea correcta.');
+    if (!res.ok) {
+      if (res.status === 429) throw new Error('Demasiadas solicitudes (Error 429). Has alcanzado el límite de tu API Key gratuita. Por favor, espera un minuto e intenta de nuevo.');
+      throw new Error('Error en la API (' + res.status + '). Verifica que tu API Key sea correcta.');
+    }
     const data = await res.json();
     let text = data.candidates[0].content.parts[0].text;
     text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
