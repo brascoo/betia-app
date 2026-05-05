@@ -940,35 +940,35 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown
     
     const cards = result.picks.map((p,i)=>{
       const st=(S.bankroll*[0.01,0.02,0.03,0.04][p.conf-1]||S.bankroll*0.02).toFixed(2);
-      return \`<div class="a-card">
-        <h4>\${p.title}</h4>
-        <p><strong>Mercado:</strong> \${p.market}</p>
-        <p><strong>Argumento:</strong> \${p.angle}</p>
-        <p><strong>Cuota:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">\${Number(p.odds).toFixed(2)}</span> &nbsp;|&nbsp; <strong>Confianza:</strong> \${p.conf}/5 &nbsp;|&nbsp; <strong>Stake:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$\${st}</span></p>
+      return `<div class="a-card">
+        <h4>${p.title}</h4>
+        <p><strong>Mercado:</strong> ${p.market}</p>
+        <p><strong>Argumento:</strong> ${p.angle}</p>
+        <p><strong>Cuota:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">${Number(p.odds).toFixed(2)}</span> &nbsp;|&nbsp; <strong>Confianza:</strong> ${p.conf}/5 &nbsp;|&nbsp; <strong>Stake:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$${st}</span></p>
         <div class="ra" style="margin-top:var(--s3)">
-          <button class="ra-btn w" onclick="addPick('\${S.sport}','\${esc(query)}','\${esc(p.market)}',\${p.odds},\${p.conf},\${st},'\${esc(p.angle)}')">➕ Agregar a Picks</button>
+          <button class="ra-btn w" onclick="addPick('${S.sport}','${esc(query)}','${esc(p.market)}',${p.odds},${p.conf},${st},'${esc(p.angle)}')">➕ Agregar a Picks</button>
         </div>
-      </div>\`;
+      </div>`;
     }).join('');
     
     const totO = result.picks.reduce((a,p)=>a*Number(p.odds), 1) * 0.8; // Estimado cuota parley
     const pSt = (S.bankroll*0.02).toFixed(2);
     const parleyLegsEnc = encodeURIComponent(JSON.stringify(result.parley));
     
-    const parleyCard = \`<div class="a-card a-card-highlight">
-      <h4>🔗 Parley sugerido — \${query} (\${sportLabel})</h4>
-      <p><strong>Selecciones:</strong> \${result.parley.join(' · ')}</p>
-      <p><strong>Cuota estimada:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">\${totO.toFixed(2)}x</span> &nbsp;|&nbsp; <strong>Stake:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$\${pSt}</span></p>
+    const parleyCard = `<div class="a-card a-card-highlight">
+      <h4>🔗 Parley sugerido — ${query} (${sportLabel})</h4>
+      <p><strong>Selecciones:</strong> ${result.parley.join(' · ')}</p>
+      <p><strong>Cuota estimada:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">${totO.toFixed(2)}x</span> &nbsp;|&nbsp; <strong>Stake:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$${pSt}</span></p>
       <div class="ra" style="margin-top:var(--s3)">
-        <button class="ra-btn w" onclick="addParley('\${esc(query)}','\${S.sport}',\${totO}, '\${parleyLegsEnc}')">➕ Agregar a Parleys</button>
+        <button class="ra-btn w" onclick="addParley('${esc(query)}','${S.sport}',${totO}, '${parleyLegsEnc}')">➕ Agregar a Parleys</button>
       </div>
-    </div>\`;
+    </div>`;
     
     out.innerHTML = cards + parleyCard;
     
   } catch (error) {
     console.error(error);
-    out.innerHTML = \`<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div><h3>Ocurrió un error</h3><p>\${error.message}</p><p style="font-size:var(--text-xs);margin-top:var(--s2);color:var(--faint)">(Asegúrate de que el formato devuelto por la IA sea correcto y tu conexión esté bien)</p></div>\`;
+    out.innerHTML = `<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div><h3>Ocurrió un error</h3><p>${error.message}</p><p style="font-size:var(--text-xs);margin-top:var(--s2);color:var(--faint)">(Asegúrate de que el formato devuelto por la IA sea correcto y tu conexión esté bien)</p></div>`;
   }
 }
 
