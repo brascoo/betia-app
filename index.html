@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BETIA Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300..700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --text-xs:.75rem;--text-sm:.875rem;--text-base:1rem;--text-lg:1.25rem;--text-xl:1.75rem;
+  --s1:.25rem;--s2:.5rem;--s3:.75rem;--s4:1rem;--s5:1.25rem;--s6:1.5rem;--s8:2rem;--s10:2.5rem;
+  --r-sm:.375rem;--r-md:.5rem;--r-lg:.75rem;--r-xl:1rem;--r-full:9999px;
+  --tr:180ms cubic-bezier(.16,1,.3,1);
+  --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
+}
+[data-theme="dark"]{
+  --bg:#0f0e0c;--sur:#161512;--sur2:#1c1b18;--sur3:#222018;--sur4:#2a2820;
+  --div:#2c2a24;--brd:#363428;--txt:#d4d2cc;--muted:#807e78;--faint:#565450;
+  --pri:#f0b429;--pri-h:#e0a010;--pri-bg:#3a3218;
+  --green:#6daa45;--green-bg:#1e2e14;--red:#e05d6b;--red-bg:#2e1018;
+  --amber:#f0a04a;--amber-bg:#2e200a;--blue:#5591c7;--blue-bg:#0e1e2e;
+  --sh-md:0 4px 16px oklch(0 0 0/.4);--sh-lg:0 12px 40px oklch(0 0 0/.5);
+}
+[data-theme="light"]{
+  --bg:#f5f4ef;--sur:#faf9f6;--sur2:#ffffff;--sur3:#eeede8;--sur4:#e5e3dc;
+  --div:#ddd9d0;--brd:#ccc8be;--txt:#1e1c16;--muted:#706e68;--faint:#b0aea8;
+  --pri:#c8880a;--pri-h:#a67008;--pri-bg:#f5e8c8;
+  --green:#3a7018;--green-bg:#dff0d4;--red:#b03040;--red-bg:#f5dde0;
+  --amber:#9a5c10;--amber-bg:#faecd8;--blue:#2060a0;--blue-bg:#ddeef8;
+  --sh-md:0 4px 16px oklch(.2 .01 80/.1);--sh-lg:0 12px 40px oklch(.2 .01 80/.14);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{-webkit-font-smoothing:antialiased;}
+body{min-height:100dvh;font-family:var(--font);font-size:var(--text-base);color:var(--txt);background:var(--bg);transition:background var(--tr),color var(--tr);}
+button{cursor:pointer;background:none;border:none;font:inherit;color:inherit;}
+input,select,textarea{font:inherit;color:inherit;}
+:focus-visible{outline:2px solid var(--pri);outline-offset:3px;border-radius:var(--r-sm);}
+@media(prefers-reduced-motion:reduce){*{transition-duration:.01ms!important;}}
+
+/* LAYOUT */
+.app{display:grid;grid-template-columns:240px 1fr;grid-template-rows:56px 1fr;min-height:100dvh;}
+.topbar{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s6);height:56px;background:var(--sur);border-bottom:1px solid var(--div);position:sticky;top:0;z-index:100;}
+.sidebar{background:var(--sur);border-right:1px solid var(--div);padding:var(--s5) 0;display:flex;flex-direction:column;position:sticky;top:56px;height:calc(100dvh - 56px);overflow-y:auto;}
+.content{padding:var(--s8) var(--s10);overflow-y:auto;}
+
+/* TOPBAR */
+.logo{display:flex;align-items:center;gap:var(--s3);}
+.logo-txt{font-size:var(--text-lg);font-weight:700;letter-spacing:-.02em;}
+.logo-badge{background:var(--pri);color:#0f0e0c;font-size:var(--text-xs);font-weight:700;padding:2px var(--s2);border-radius:var(--r-full);}
+.topbar-right{display:flex;align-items:center;gap:var(--s4);}
+.bk-chip{display:flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s4);background:var(--green-bg);border:1px solid var(--green);border-radius:var(--r-full);color:var(--green);font-size:var(--text-sm);font-weight:700;font-family:var(--mono);}
+.icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--r-md);color:var(--muted);}
+.icon-btn:hover{background:var(--sur3);color:var(--txt);}
+
+/* SIDEBAR */
+.nav-sect{padding:var(--s2) var(--s4) var(--s1);font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);}
+.nav-item{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) var(--s6);font-size:var(--text-sm);color:var(--muted);cursor:pointer;border-left:3px solid transparent;transition:all var(--tr);}
+.nav-item:hover{background:var(--sur3);color:var(--txt);}
+.nav-item.active{background:var(--pri-bg);color:var(--pri);border-left-color:var(--pri);font-weight:600;}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--sur4);color:var(--muted);font-size:var(--text-xs);font-weight:700;padding:1px var(--s2);border-radius:var(--r-full);}
+.nav-item.active .nav-badge{background:var(--pri-bg);color:var(--pri);}
+
+/* VIEWS */
+.view{display:none;animation:fadeIn 200ms ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+/* PAGE HEADER */
+.ph{margin-bottom:var(--s8);}
+.ph-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:var(--s4);}
+.ph h1{font-size:var(--text-xl);font-weight:700;}
+.ph p{font-size:var(--text-sm);color:var(--muted);margin-top:var(--s1);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s2) var(--s5);font-size:var(--text-sm);font-weight:600;border-radius:var(--r-md);border:1px solid transparent;transition:all var(--tr);}
+.btn-pri{background:var(--pri);color:#0f0e0c;}
+.btn-pri:hover{background:var(--pri-h);}
+.btn-ghost{background:transparent;color:var(--muted);border-color:var(--brd);}
+.btn-ghost:hover{background:var(--sur3);color:var(--txt);}
+.btn-sm{padding:var(--s1) var(--s3);font-size:var(--text-xs);}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:var(--s4);margin-bottom:var(--s8);}
+.sc{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-lg);padding:var(--s5);}
+.sc-label{font-size:var(--text-xs);color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:var(--s2);}
+.sc-val{font-size:var(--text-xl);font-weight:700;font-family:var(--mono);color:var(--txt);}
+.sc-val.g{color:var(--green);}.sc-val.y{color:var(--pri);}.sc-val.r{color:var(--red);}
+
+/* FILTERS */
+.filters{display:flex;align-items:center;gap:var(--s3);margin-bottom:var(--s6);flex-wrap:wrap;}
+.fpill{padding:var(--s2) var(--s4);font-size:var(--text-xs);font-weight:600;border-radius:var(--r-full);border:1px solid var(--brd);background:transparent;color:var(--muted);}
+.fpill:hover{border-color:var(--pri);color:var(--pri);}
+.fpill.active{background:var(--pri-bg);border-color:var(--pri);color:var(--pri);}
+.srch{padding:var(--s2) var(--s4);font-size:var(--text-sm);border-radius:var(--r-md);border:1px solid var(--brd);background:var(--sur);color:var(--txt);min-width:200px;}
+.srch:focus{outline:none;border-color:var(--pri);}
+.srch::placeholder{color:var(--faint);}
+
+/* CARDS */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:var(--s5);}
+.card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);overflow:hidden;transition:box-shadow var(--tr),transform var(--tr);}
+.card:hover{box-shadow:var(--sh-md);transform:translateY(-2px);}
+
+/* PICK CARD */
+.card-hd{padding:var(--s5) var(--s5) var(--s4);display:flex;align-items:flex-start;justify-content:space-between;gap:var(--s3);}
+.sport-badge{padding:3px var(--s3);border-radius:var(--r-full);font-size:var(--text-xs);font-weight:700;}
+.sb-f{background:#1a2a14;color:#6daa45;}.sb-b{background:#2a1a08;color:#f0a04a;}.sb-t{background:#0e1e2e;color:#5591c7;}.sb-o{background:#1e1a2a;color:#a86fdf;}
+.odds-big{font-family:var(--mono);font-size:var(--text-lg);font-weight:700;color:var(--pri);}
+.card-bd{padding:0 var(--s5) var(--s5);}
+.card-match{font-size:var(--text-base);font-weight:600;margin-bottom:var(--s2);}
+.card-sel{font-size:var(--text-sm);color:var(--muted);margin-bottom:var(--s4);}
+.card-analysis{font-size:var(--text-xs);color:var(--faint);line-height:1.5;background:var(--sur3);padding:var(--s3);border-radius:var(--r-md);margin-bottom:var(--s4);}
+.card-footer{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);}
+.card-meta{display:flex;align-items:center;gap:var(--s3);}
+.card-date{font-size:var(--text-xs);color:var(--faint);}
+.card-units{font-size:var(--text-xs);font-family:var(--mono);color:var(--muted);}
+.status-b{padding:2px var(--s3);border-radius:var(--r-full);font-size:var(--text-xs);font-weight:700;}
+.sp{background:var(--amber-bg);color:var(--amber);}.sw{background:var(--green-bg);color:var(--green);}.sl{background:var(--red-bg);color:var(--red);}.sv{background:var(--sur4);color:var(--muted);}
+.conf-dots{display:flex;gap:3px;margin-top:var(--s2);}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--sur4);}.dot.on{background:var(--pri);}
+
+/* RESULT ACTIONS */
+.ra{display:flex;gap:var(--s2);margin-top:var(--s4);flex-wrap:wrap;}
+.ra-btn{padding:5px var(--s3);border-radius:var(--r-md);font-size:var(--text-xs);font-weight:700;border:1px solid var(--brd);background:var(--sur2);color:var(--muted);transition:all var(--tr);}
+.ra-btn:hover{transform:translateY(-1px);}
+.ra-btn.w{border-color:var(--green);color:var(--green);background:var(--green-bg);}
+.ra-btn.l{border-color:var(--red);color:var(--red);background:var(--red-bg);}
+.ra-btn.v{border-color:var(--faint);color:var(--muted);}
+.ra-btn.reset{border-color:var(--pri);color:var(--pri);background:var(--pri-bg);}
+
+/* PARLEY CARD */
+.plh{padding:var(--s5);background:linear-gradient(135deg,var(--sur2),var(--sur));border-bottom:1px solid var(--div);display:flex;justify-content:space-between;align-items:flex-start;}
+.pl-title{font-size:var(--text-base);font-weight:700;margin-bottom:var(--s1);}
+.pl-odds{font-family:var(--mono);font-size:var(--text-xl);font-weight:700;color:var(--pri);}
+.pl-legs{padding:var(--s5);}
+.leg{display:flex;align-items:center;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--div);}
+.leg:last-child{border-bottom:none;}
+.leg-num{width:22px;height:22px;border-radius:50%;background:var(--sur3);display:flex;align-items:center;justify-content:center;font-size:var(--text-xs);font-weight:700;color:var(--muted);flex-shrink:0;}
+.leg-info{flex:1;min-width:0;}
+.leg-match{font-size:var(--text-sm);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.leg-sel{font-size:var(--text-xs);color:var(--muted);}
+.leg-odds{font-family:var(--mono);font-size:var(--text-sm);font-weight:600;color:var(--pri);flex-shrink:0;}
+.leg-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.leg-dot.won{background:var(--green);}.leg-dot.lost{background:var(--red);}.leg-dot.pending{background:var(--amber);}
+.plf{padding:var(--s4) var(--s5);background:var(--sur3);display:flex;align-items:center;justify-content:space-between;gap:var(--s4);}
+.pl-stake{font-size:var(--text-xs);color:var(--muted);}
+.pl-stake span{font-family:var(--mono);color:var(--txt);font-weight:600;}
+.pl-potential{font-size:var(--text-xs);color:var(--green);}
+.pl-potential span{font-family:var(--mono);font-weight:700;}
+
+/* RESULTS TABLE */
+.tbl-wrap{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead{background:var(--sur3);}
+th{padding:var(--s3) var(--s5);font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;border-bottom:1px solid var(--div);}
+td{padding:var(--s4) var(--s5);font-size:var(--text-sm);border-bottom:1px solid var(--div);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--sur2);}
+.tm{font-family:var(--mono);font-weight:600;}
+
+/* CHART */
+.chart-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);padding:var(--s6);margin-bottom:var(--s6);}
+.chart-card h3{font-size:var(--text-base);font-weight:700;margin-bottom:var(--s5);}
+svg.profit-chart{width:100%;height:180px;}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:oklch(0 0 0/.65);z-index:200;display:flex;align-items:center;justify-content:center;padding:var(--s4);opacity:0;pointer-events:none;transition:opacity var(--tr);}
+.overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);padding:var(--s8);width:100%;max-width:520px;box-shadow:var(--sh-lg);transform:translateY(16px) scale(.97);transition:transform var(--tr);}
+.overlay.open .modal{transform:none;}
+.modal h2{font-size:var(--text-lg);font-weight:700;margin-bottom:var(--s6);}
+.fg{display:flex;flex-direction:column;gap:var(--s2);margin-bottom:var(--s4);}
+.fg label{font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);}
+.fc{padding:var(--s3) var(--s4);border:1px solid var(--brd);border-radius:var(--r-md);background:var(--sur2);color:var(--txt);font-size:var(--text-sm);width:100%;}
+.fc:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 3px oklch(from var(--pri) l c h/.15);}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--s4);}
+.m-actions{display:flex;gap:var(--s3);justify-content:flex-end;margin-top:var(--s6);}
+
+/* ANALYSIS VIEW */
+.a-layout{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--s6);align-items:start;}
+.a-panel{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);padding:var(--s6);}
+.a-panel h3{font-size:var(--text-lg);font-weight:700;margin-bottom:var(--s4);}
+.sport-pills{display:flex;gap:var(--s3);flex-wrap:wrap;margin-bottom:var(--s5);}
+.sp-pill{padding:var(--s2) var(--s5);border-radius:var(--r-full);border:1px solid var(--brd);font-size:var(--text-sm);font-weight:700;color:var(--muted);background:var(--sur2);}
+.sp-pill.active{border-color:var(--pri);color:var(--pri);background:var(--pri-bg);}
+.quick-tags{display:flex;gap:var(--s2);flex-wrap:wrap;margin-top:var(--s4);}
+.qtag{padding:6px var(--s3);font-size:var(--text-xs);font-weight:600;border:1px solid var(--brd);border-radius:var(--r-full);background:var(--sur2);color:var(--muted);}
+.qtag:hover{border-color:var(--pri);color:var(--pri);}
+.a-results{display:grid;gap:var(--s4);}
+.a-card{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r-lg);padding:var(--s5);}
+.a-card h4{font-size:var(--text-base);font-weight:700;margin-bottom:var(--s2);}
+.a-card p{font-size:var(--text-sm);color:var(--muted);margin-bottom:var(--s2);}
+.a-card-highlight{background:var(--pri-bg);border-color:var(--pri);}
+
+/* BANKROLL CONFIG */
+.bk-cfg{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);padding:var(--s6);margin-bottom:var(--s6);}
+.bk-cfg h3{font-size:var(--text-base);font-weight:700;margin-bottom:var(--s4);}
+.bk-row{display:flex;align-items:center;gap:var(--s3);flex-wrap:wrap;}
+.bk-input{padding:var(--s3) var(--s4);border:1px solid var(--brd);border-radius:var(--r-md);background:var(--sur2);color:var(--txt);font-size:var(--text-lg);font-weight:700;font-family:var(--mono);width:160px;}
+.bk-input:focus{outline:none;border-color:var(--pri);}
+.bk-units{display:flex;gap:var(--s2);margin-top:var(--s3);flex-wrap:wrap;}
+.bk-unit{padding:6px var(--s4);font-size:var(--text-xs);font-weight:700;border:1px solid var(--brd);border-radius:var(--r-full);background:var(--sur2);color:var(--muted);}
+.bk-unit:hover{border-color:var(--pri);color:var(--pri);}
+.bk-info{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s3);margin-top:var(--s5);}
+.bk-stat{background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r-lg);padding:var(--s4);}
+.bk-stat-l{font-size:var(--text-xs);color:var(--muted);margin-bottom:var(--s1);}
+.bk-stat-v{font-size:var(--text-base);font-weight:700;font-family:var(--mono);color:var(--txt);}
+
+/* EMPTY */
+.empty{display:flex;flex-direction:column;align-items:center;text-align:center;padding:4rem var(--s8);color:var(--muted);}
+.empty h3{color:var(--txt);margin-bottom:var(--s2);}
+.empty p{font-size:var(--text-sm);max-width:34ch;margin-bottom:var(--s6);}
+
+/* CONTEXT */
+.ctx-card{background:var(--sur);border:1px solid var(--brd);border-radius:var(--r-xl);padding:var(--s6);margin-bottom:var(--s6);}
+.ctx-card h3{font-size:var(--text-base);font-weight:700;margin-bottom:var(--s4);color:var(--pri);}
+.ctx-item{display:flex;align-items:flex-start;gap:var(--s3);padding:var(--s3) 0;border-bottom:1px solid var(--div);}
+.ctx-item:last-child{border-bottom:none;}
+.ctx-ico{width:17px;height:17px;flex-shrink:0;color:var(--pri);margin-top:2px;}
+.ctx-txt{font-size:var(--text-sm);color:var(--muted);}
+.ctx-txt strong{color:var(--txt);}
+.tag-grid{display:flex;flex-wrap:wrap;gap:var(--s2);margin-top:var(--s2);}
+.tag{padding:var(--s2) var(--s3);font-size:var(--text-xs);font-weight:600;background:var(--sur2);border:1px solid var(--brd);border-radius:var(--r-md);}
+
+/* MOBILE */
+.mob-nav{display:none;}
+@media(max-width:768px){
+  .app{grid-template-columns:1fr;grid-template-rows:56px 1fr 60px;}
+  .sidebar{display:none;}
+  .content{grid-column:1;padding:var(--s5) var(--s4);}
+  .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sur);border-top:1px solid var(--div);height:60px;z-index:100;}
+  .mn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:10px;font-weight:600;color:var(--muted);}
+  .mn-item.active{color:var(--pri);}
+  .mn-item svg{width:20px;height:20px;}
+  .grid{grid-template-columns:1fr;}
+  .fg-row{grid-template-columns:1fr;}
+  .a-layout{grid-template-columns:1fr;}
+  .stats{grid-template-columns:1fr 1fr;}
+  .topbar{padding:0 var(--s4);}
+  .bk-chip .chip-label{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="logo">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="8" fill="#f0b429"/>
+      <path d="M8 22L16 8l8 14" stroke="#0f0e0c" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+      <circle cx="16" cy="20" r="2.5" fill="#0f0e0c"/>
+      <line x1="10" y1="18" x2="22" y2="18" stroke="#0f0e0c" stroke-width="1.5"/>
+    </svg>
+    <span class="logo-txt">BETIA</span>
+    <span class="logo-badge">PRO</span>
+  </div>
+  <div class="topbar-right">
+    <div class="bk-chip">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+      <span class="chip-label">Bankroll</span>
+      <span id="bk-display">$250.00</span>
+    </div>
+    <button class="icon-btn" id="theme-btn" title="Cambiar tema">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="nav-sect">Apuestas</div>
+  <div class="nav-item active" onclick="go('picks')" id="nav-picks">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    Picks <span class="nav-badge" id="picks-cnt">0</span>
+  </div>
+  <div class="nav-item" onclick="go('parleys')" id="nav-parleys">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Parleys <span class="nav-badge" id="parleys-cnt">0</span>
+  </div>
+  <div class="nav-sect" style="margin-top:var(--s4)">Herramientas</div>
+  <div class="nav-item" onclick="go('analisis')" id="nav-analisis">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Análisis IA
+  </div>
+  <div class="nav-item" onclick="go('resultados')" id="nav-resultados">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+    Resultados
+  </div>
+  <div class="nav-item" onclick="go('contexto')" id="nav-contexto">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    Contexto
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="content">
+
+<!-- ═ PICKS ═ -->
+<div id="v-picks" class="view active">
+  <div class="ph">
+    <div class="ph-row">
+      <div><h1>Picks del día</h1><p>Selecciones individuales con análisis de contexto</p></div>
+      <button class="btn btn-pri" onclick="openModal('pick')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo Pick
+      </button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="sc"><div class="sc-label">Total picks</div><div class="sc-val" id="s-total">0</div></div>
+    <div class="sc"><div class="sc-label">Win rate</div><div class="sc-val y" id="s-wr">—</div></div>
+    <div class="sc"><div class="sc-label">Profit (u)</div><div class="sc-val g" id="s-profit">0.00</div></div>
+    <div class="sc"><div class="sc-label">ROI</div><div class="sc-val" id="s-roi">—</div></div>
+  </div>
+  <div class="filters">
+    <button class="fpill active" onclick="filterPicks('todos',this)">Todos</button>
+    <button class="fpill" onclick="filterPicks('pendiente',this)">Pendientes</button>
+    <button class="fpill" onclick="filterPicks('ganado',this)">Ganados</button>
+    <button class="fpill" onclick="filterPicks('perdido',this)">Perdidos</button>
+    <input class="srch" type="text" placeholder="Buscar partido..." id="picks-q" oninput="renderPicks()">
+  </div>
+  <div class="grid" id="picks-grid"></div>
+</div>
+
+<!-- ═ PARLEYS ═ -->
+<div id="v-parleys" class="view">
+  <div class="ph">
+    <div class="ph-row">
+      <div><h1>Parleys</h1><p>Combinaciones para maximizar retorno</p></div>
+      <button class="btn btn-pri" onclick="openModal('parley')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo Parley
+      </button>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="sc"><div class="sc-label">Total parleys</div><div class="sc-val" id="ps-total">0</div></div>
+    <div class="sc"><div class="sc-label">Ganados</div><div class="sc-val g" id="ps-won">0</div></div>
+    <div class="sc"><div class="sc-label">Mejor cuota</div><div class="sc-val y" id="ps-best">—</div></div>
+    <div class="sc"><div class="sc-label">Ganancia</div><div class="sc-val" id="ps-profit">$0.00</div></div>
+  </div>
+  <div class="grid" id="parleys-grid"></div>
+</div>
+
+<!-- ═ ANÁLISIS IA ═ -->
+<div id="v-analisis" class="view">
+  <div class="ph"><h1>Análisis IA</h1><p>Busca ligas o partidos para generar picks y parleys</p></div>
+
+  <div class="bk-cfg">
+    <h3>💰 Bankroll activo</h3>
+    <div class="bk-row">
+      <input type="number" class="bk-input" id="bk-input" placeholder="250" min="1" step="1">
+      <button class="btn btn-pri" onclick="saveBankroll()">Guardar</button>
+      <span style="font-size:var(--text-sm);color:var(--muted)">Define tu capital base para calcular stakes automáticamente.</span>
+    </div>
+    <div class="bk-units">
+      <button class="bk-unit" onclick="setBK(50)">$50</button>
+      <button class="bk-unit" onclick="setBK(100)">$100</button>
+      <button class="bk-unit" onclick="setBK(250)">$250</button>
+      <button class="bk-unit" onclick="setBK(500)">$500</button>
+      <button class="bk-unit" onclick="setBK(1000)">$1,000</button>
+    </div>
+    <div class="bk-info" id="bk-info"></div>
+  </div>
+
+  <div class="a-layout">
+    <section class="a-panel">
+      <h3>¿Qué quieres analizar?</h3>
+      <div class="sport-pills">
+        <button class="sp-pill active" id="sp-football" onclick="setSport('football')">⚽ Fútbol</button>
+        <button class="sp-pill" id="sp-tennis" onclick="setSport('tennis')">🎾 Tenis</button>
+        <button class="sp-pill" id="sp-basketball" onclick="setSport('basketball')">🏀 Baloncesto</button>
+      </div>
+      <div class="fg">
+        <label>Liga o partido</label>
+        <input type="text" class="fc" id="a-query" placeholder="Ej: Premier League, Alcaraz vs Sinner, Lakers vs Celtics">
+      </div>
+      <div class="fg">
+        <label>Contexto adicional (opcional)</label>
+        <textarea class="fc" id="a-notes" rows="3" placeholder="Ej: Quiero mercados conservadores, picks de valor, cuota entre 1.70 y 2.20..."></textarea>
+      </div>
+      <button class="btn btn-pri" onclick="generate()" style="width:100%">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Generar análisis
+      </button>
+      <div class="quick-tags">
+        <button class="qtag" onclick="qs('Premier League')">⚽ Premier League</button>
+        <button class="qtag" onclick="qs('LaLiga')">⚽ LaLiga</button>
+        <button class="qtag" onclick="qs('Champions League UCL')">⚽ Champions</button>
+        <button class="qtag" onclick="qs('Liga BetPlay Colombia')">⚽ BetPlay</button>
+        <button class="qtag" onclick="qs('NBA playoffs')">🏀 NBA Playoffs</button>
+        <button class="qtag" onclick="qs('NBA jornada regular')">🏀 NBA Regular</button>
+        <button class="qtag" onclick="qs('ATP Masters 1000')">🎾 ATP Masters</button>
+        <button class="qtag" onclick="qs('ATP Grand Slam')">🎾 Grand Slam</button>
+      </div>
+    </section>
+
+    <aside class="a-panel">
+      <h3>Sugerencias BETIA</h3>
+      <p style="font-size:var(--text-sm);color:var(--muted);margin-bottom:var(--s4)">Picks recomendados con stake calculado sobre tu bankroll activo.</p>
+      <div class="a-results" id="a-output">
+        <div class="empty" style="padding:var(--s8) var(--s4)">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🔎</div>
+          <h3>Busca una liga o partido</h3>
+          <p>Selecciona deporte y escribe la liga o el enfrentamiento que quieras analizar.</p>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- ═ RESULTADOS ═ -->
+<div id="v-resultados" class="view">
+  <div class="ph"><h1>Resultados & Historial</h1><p>Evolución del bankroll y registro de todas las apuestas</p></div>
+  <div class="chart-card">
+    <h3>📈 Evolución del Bankroll</h3>
+    <svg class="profit-chart" id="chart-svg" viewBox="0 0 800 180" preserveAspectRatio="none"></svg>
+  </div>
+  <div class="stats" style="margin-bottom:var(--s6)">
+    <div class="sc"><div class="sc-label">P/G</div><div class="sc-val" id="r-pg">0/0</div></div>
+    <div class="sc"><div class="sc-label">% Acierto</div><div class="sc-val y" id="r-wr">—</div></div>
+    <div class="sc"><div class="sc-label">Ganancia neta</div><div class="sc-val g" id="r-net">$0.00</div></div>
+    <div class="sc"><div class="sc-label">Mejor racha</div><div class="sc-val" id="r-streak">0</div></div>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Fecha</th><th>Partido</th><th>Tipo</th><th>Selección</th><th>Cuota</th><th>Stake</th><th>P/L</th><th>Estado</th></tr></thead>
+      <tbody id="r-tbody"></tbody>
+    </table>
+    <div id="r-empty" class="empty" style="display:none">
+      <div style="font-size:2rem;margin-bottom:.5rem">📋</div>
+      <h3>Sin resultados aún</h3>
+      <p>Registra picks y marca sus resultados para ver el historial.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═ CONTEXTO ═ -->
+<div id="v-contexto" class="view">
+  <div class="ph"><h1>Contexto BETIA</h1><p>Metodología y criterios para la selección de apuestas</p></div>
+  <div class="ctx-card">
+    <h3>🎯 Criterios de selección — Picks</h3>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><div class="ctx-txt"><strong>Cuota mínima 1.50:</strong> Solo picks con valor esperado positivo (EV+).</div></div>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><div class="ctx-txt"><strong>Stake por confianza:</strong> 1% (baja), 2% (media), 3% (alta), 4% (muy alta) del bankroll.</div></div>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><div class="ctx-txt"><strong>Análisis obligatorio:</strong> Forma reciente (5 partidos), H2H, bajas, motivación y condiciones.</div></div>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg><div class="ctx-txt"><strong>Mercados preferidos:</strong> 1X2, Ambos marcan, Over/Under, Hándicap asiático, Moneyline, Total puntos/juegos.</div></div>
+  </div>
+  <div class="ctx-card">
+    <h3>🔗 Reglas de Parleys</h3>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg><div class="ctx-txt"><strong>Máximo 4 selecciones.</strong> Cuota total objetivo entre 3.00 y 8.00.</div></div>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><div class="ctx-txt"><strong>Stake máximo 2%</strong> del bankroll por parley. No combinar picks correlacionados.</div></div>
+    <div class="ctx-item"><svg class="ctx-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><div class="ctx-txt"><strong>Solo picks de alta confianza</strong> (4/5 o 5/5) deben entrar en un parley.</div></div>
+  </div>
+  <div class="ctx-card">
+    <h3>📊 Deportes y ligas en seguimiento</h3>
+    <div style="margin-top:var(--s2)">
+      <p style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:var(--s3)">⚽ Fútbol</p>
+      <div class="tag-grid">
+        ${" ".join(f'<span class="tag">{l}</span>' for l in ['Premier League','LaLiga','Serie A','Bundesliga','Ligue 1','Champions UCL','Copa Libertadores','Liga BetPlay'])}
+      </div>
+      <p style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:var(--s5) 0 var(--s3)">🏀 Baloncesto</p>
+      <div class="tag-grid">
+        ${" ".join(f'<span class="tag">{l}</span>' for l in ['NBA Regular','NBA Playoffs','EuroLeague'])}
+      </div>
+      <p style="font-size:var(--text-xs);font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:var(--s5) 0 var(--s3)">🎾 Tenis</p>
+      <div class="tag-grid">
+        ${" ".join(f'<span class="tag">{l}</span>' for l in ['ATP Masters 1000','ATP Grand Slams','ATP 500','WTA Tour'])}
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MOBILE NAV -->
+<nav class="mob-nav">
+  <div class="mn-item active" onclick="go('picks')" id="mn-picks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Picks</div>
+  <div class="mn-item" onclick="go('parleys')" id="mn-parleys"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Parleys</div>
+  <div class="mn-item" onclick="go('analisis')" id="mn-analisis"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Análisis</div>
+  <div class="mn-item" onclick="go('resultados')" id="mn-resultados"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Resultados</div>
+  <div class="mn-item" onclick="go('contexto')" id="mn-contexto"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>Contexto</div>
+</nav>
+
+<!-- MODAL PICK -->
+<div class="overlay" id="modal-pick">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h2>Registrar Pick</h2>
+    <div class="fg-row">
+      <div class="fg"><label>Deporte</label>
+        <select class="fc" id="p-sport">
+          <option value="football">⚽ Fútbol</option>
+          <option value="basketball">🏀 Baloncesto</option>
+          <option value="tennis">🎾 Tenis</option>
+          <option value="otros">🎯 Otros</option>
+        </select>
+      </div>
+      <div class="fg"><label>Fecha</label><input type="date" class="fc" id="p-date"></div>
+    </div>
+    <div class="fg"><label>Partido</label><input type="text" class="fc" id="p-match" placeholder="Arsenal vs Chelsea"></div>
+    <div class="fg"><label>Selección</label><input type="text" class="fc" id="p-sel" placeholder="Arsenal gana / Over 2.5 goles"></div>
+    <div class="fg-row">
+      <div class="fg"><label>Cuota</label><input type="number" class="fc" id="p-odds" placeholder="1.85" step="0.01" min="1.01"></div>
+      <div class="fg"><label>Stake ($)</label><input type="number" class="fc" id="p-stake" placeholder="5.00" step="0.5" min="0.5"></div>
+    </div>
+    <div class="fg">
+      <label>Confianza</label>
+      <div style="display:flex;gap:var(--s2)">
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setConf(1)" id="c1" style="min-width:40px">★</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setConf(2)" id="c2">★★</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setConf(3)" id="c3">★★★</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setConf(4)" id="c4">★★★★</button>
+        <button type="button" class="btn btn-ghost btn-sm" onclick="setConf(5)" id="c5">★★★★★</button>
+      </div>
+    </div>
+    <div class="fg"><label>Análisis / Contexto</label><textarea class="fc" id="p-note" rows="3" placeholder="Forma reciente, bajas, motivación..."></textarea></div>
+    <div class="m-actions">
+      <button class="btn btn-ghost" onclick="closeModal('pick')">Cancelar</button>
+      <button class="btn btn-pri" onclick="savePick()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PARLEY -->
+<div class="overlay" id="modal-parley">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:600px">
+    <h2>Registrar Parley</h2>
+    <div class="fg-row">
+      <div class="fg"><label>Nombre</label><input type="text" class="fc" id="pl-name" placeholder="Parley Express Viernes"></div>
+      <div class="fg"><label>Stake ($)</label><input type="number" class="fc" id="pl-stake" placeholder="5.00" step="0.5" min="1"></div>
+    </div>
+    <div id="pl-legs"></div>
+    <button class="btn btn-ghost" onclick="addLeg()" style="width:100%;margin-bottom:var(--s4)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Agregar selección
+    </button>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--s4);background:var(--sur3);border-radius:var(--r-md)">
+      <span style="font-size:var(--text-sm);color:var(--muted)">Cuota total</span>
+      <span style="font-family:var(--mono);font-size:var(--text-lg);font-weight:700;color:var(--pri)" id="pl-total">—</span>
+    </div>
+    <div class="m-actions">
+      <button class="btn btn-ghost" onclick="closeModal('parley')">Cancelar</button>
+      <button class="btn btn-pri" onclick="saveParley()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+//  STATE + LOCALSTORAGE
+// ══════════════════════════════════════════
+const LS = {
+  get(k,d){try{const v=localStorage.getItem('betia_'+k);return v?JSON.parse(v):d;}catch{return d;}},
+  set(k,v){try{localStorage.setItem('betia_'+k,JSON.stringify(v));}catch{}}
+};
+
+let S = {
+  picks:    LS.get('picks',   []),
+  parleys:  LS.get('parleys', []),
+  bankroll: LS.get('bankroll',250),
+  sport:    'football',
+  conf:     3,
+  legs:     []
+};
+
+function save(){
+  LS.set('picks',   S.picks);
+  LS.set('parleys', S.parleys);
+  LS.set('bankroll',S.bankroll);
+}
+
+// ══════════════════════════════════════════
+//  SEED (solo si no hay datos guardados)
+// ══════════════════════════════════════════
+if(!S.picks.length){
+  S.picks = [
+    {id:1,sport:'football',match:'Arsenal vs Chelsea',selection:'Arsenal gana',odds:2.10,stake:5,status:'ganado',date:'2026-04-28',analysis:'Arsenal en casa con 5 victorias seguidas. Chelsea sin Kane.',confidence:4},
+    {id:2,sport:'basketball',match:'Lakers vs Celtics',selection:'Over 215.5 pts',odds:1.85,stake:4,status:'perdido',date:'2026-04-29',analysis:'Alto ritmo ofensivo en ambos equipos.',confidence:3},
+    {id:3,sport:'football',match:'Real Madrid vs Barça',selection:'Ambos marcan',odds:1.65,stake:5,status:'ganado',date:'2026-04-30',analysis:'Clásico: ambos ataques en forma, pocas porterías a cero.',confidence:5},
+    {id:4,sport:'tennis',match:'Alcaraz vs Djokovic',selection:'Alcaraz gana',odds:2.30,stake:2.5,status:'pendiente',date:'2026-05-05',analysis:'Alcaraz dominante en tierra batida.',confidence:4},
+    {id:5,sport:'football',match:'Millonarios vs Nacional',selection:'Local gana',odds:1.90,stake:3,status:'pendiente',date:'2026-05-05',analysis:'Millonarios fuerte en el Campín.',confidence:3}
+  ];
+  S.parleys = [
+    {id:1,name:'Parley Express',stake:10,status:'ganado',date:'2026-04-28',legs:[
+      {match:'Arsenal vs Chelsea',selection:'Arsenal gana',odds:2.10,status:'won'},
+      {match:'Real Madrid vs Barça',selection:'Ambos marcan',odds:1.65,status:'won'}
+    ]},
+    {id:2,name:'NBA Double',stake:5,status:'perdido',date:'2026-04-29',legs:[
+      {match:'Lakers vs Celtics',selection:'Over 215.5',odds:1.85,status:'lost'},
+      {match:'Warriors vs Suns',selection:'Warriors gana',odds:1.70,status:'pending'}
+    ]}
+  ];
+  save();
+}
+
+// ══════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════
+const VIEWS = ['picks','parleys','analisis','resultados','contexto'];
+function go(v){
+  VIEWS.forEach(n=>{
+    document.getElementById('v-'+n)?.classList.toggle('active',n===v);
+    document.getElementById('nav-'+n)?.classList.toggle('active',n===v);
+    document.getElementById('mn-'+n)?.classList.toggle('active',n===v);
+  });
+  if(v==='resultados') renderChart();
+  if(v==='analisis') renderBKInfo();
+}
+
+// ══════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════
+(function(){
+  const btn=document.getElementById('theme-btn');
+  const root=document.documentElement;
+  let t=LS.get('theme', matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  root.setAttribute('data-theme',t);
+  btn.addEventListener('click',()=>{t=t==='dark'?'light':'dark';root.setAttribute('data-theme',t);LS.set('theme',t);});
+})();
+
+// ══════════════════════════════════════════
+//  BANKROLL
+// ══════════════════════════════════════════
+function saveBankroll(){
+  const v=parseFloat(document.getElementById('bk-input').value);
+  if(isNaN(v)||v<=0){alert('Bankroll inválido');return;}
+  S.bankroll=v; save(); updateBKDisplay(); renderBKInfo();
+  alert('✅ Bankroll guardado: $'+v.toFixed(2));
+}
+function setBK(v){
+  document.getElementById('bk-input').value=v;
+  S.bankroll=v; save(); updateBKDisplay(); renderBKInfo();
+}
+function updateBKDisplay(){
+  const net=S.picks.filter(p=>p.status!=='pendiente').reduce((a,p)=>
+    p.status==='ganado'?a+(p.odds-1)*p.stake:a-p.stake,0);
+  document.getElementById('bk-display').textContent='$'+(S.bankroll+net).toFixed(2);
+}
+function renderBKInfo(){
+  const el=document.getElementById('bk-info');
+  if(!el) return;
+  const bk=S.bankroll;
+  el.innerHTML=[
+    ['Stake 1% (baja)',  '$'+(bk*0.01).toFixed(2)],
+    ['Stake 2% (media)', '$'+(bk*0.02).toFixed(2)],
+    ['Stake 3% (alta)',  '$'+(bk*0.03).toFixed(2)],
+    ['Stake 4% (muy alta)','$'+(bk*0.04).toFixed(2)],
+    ['Stake parley (2%)','$'+(bk*0.02).toFixed(2)],
+  ].map(([l,v])=>`<div class="bk-stat"><div class="bk-stat-l">${l}</div><div class="bk-stat-v">${v}</div></div>`).join('');
+  const inp=document.getElementById('bk-input');
+  if(inp) inp.value=bk;
+}
+
+// ══════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════
+function sbadge(sport){
+  const m={football:['sb-f','⚽ Fútbol'],basketball:['sb-b','🏀 Baloncesto'],tennis:['sb-t','🎾 Tenis'],otros:['sb-o','🎯 Otros']};
+  const[c,l]=m[sport]||m.otros;
+  return`<span class="sport-badge ${c}">${l}</span>`;
+}
+function stbadge(s){
+  const m={pendiente:['sp','Pendiente'],ganado:['sw','✓ Ganado'],perdido:['sl','✗ Perdido'],anulado:['sv','Ø Anulado']};
+  const[c,l]=m[s]||m.sp;
+  return`<span class="status-b ${c}">${l}</span>`;
+}
+function dots(n){return Array.from({length:5},(_,i)=>`<span class="dot${i<n?' on':''}"></span>`).join('');}
+function esc(s){return String(s||'').replace(/'/g,"&#39;").replace(/"/g,'&quot;').replace(/\n/g,' ');}
+function refreshAll(){renderPicks();renderParleys();renderResults();updateBKDisplay();}
+
+// ══════════════════════════════════════════
+//  PICKS
+// ══════════════════════════════════════════
+let pickFilter='todos';
+function filterPicks(f,el){
+  pickFilter=f;
+  document.querySelectorAll('.fpill').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderPicks();
+}
+function renderPicks(){
+  const q=(document.getElementById('picks-q')?.value||'').toLowerCase();
+  let list=S.picks.filter(p=>{
+    if(pickFilter!=='todos'&&p.status!==pickFilter)return false;
+    if(q&&!p.match.toLowerCase().includes(q)&&!p.selection.toLowerCase().includes(q))return false;
+    return true;
+  });
+  const grid=document.getElementById('picks-grid');
+  document.getElementById('picks-cnt').textContent=S.picks.length;
+  if(!list.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:2.5rem;margin-bottom:.75rem">🏟️</div><h3>Sin picks</h3><p>Agrega picks con el botón o usa Análisis IA.</p></div>';return;}
+  grid.innerHTML=list.map(p=>{
+    const res=p.status==='ganado'?`+${((p.odds-1)*p.stake).toFixed(2)}`:p.status==='perdido'?`-${p.stake.toFixed(2)}`:'—';
+    const rColor=p.status==='ganado'?'color:var(--green)':p.status==='perdido'?'color:var(--red)':'';
+    return`<div class="card">
+      <div class="card-hd">${sbadge(p.sport)}<span class="odds-big">${p.odds.toFixed(2)}</span></div>
+      <div class="card-bd">
+        <div class="card-match">${p.match}</div>
+        <div class="card-sel">${p.selection}</div>
+        ${p.analysis?`<div class="card-analysis">${p.analysis}</div>`:''}
+        <div class="card-footer">
+          <div class="card-meta">
+            <span class="card-date">📅 ${p.date}</span>
+            <span class="card-units tm">$${p.stake.toFixed(2)}</span>
+            <span class="tm" style="font-size:var(--text-xs);${rColor}">${res}</span>
+          </div>
+          ${stbadge(p.status)}
+        </div>
+        <div class="conf-dots" title="Confianza ${p.confidence}/5">${dots(p.confidence)}</div>
+        <div class="ra">
+          <button class="ra-btn w" onclick="setPS(${p.id},'ganado')">✓ Ganado</button>
+          <button class="ra-btn l" onclick="setPS(${p.id},'perdido')">✗ Perdido</button>
+          <button class="ra-btn v" onclick="setPS(${p.id},'anulado')">Ø Anulado</button>
+          <button class="ra-btn reset" onclick="setPS(${p.id},'pendiente')">↺ Pendiente</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  updateStats();
+}
+function setPS(id,status){S.picks=S.picks.map(p=>p.id===id?{...p,status}:p);save();refreshAll();}
+function updateStats(){
+  const res=S.picks.filter(p=>p.status==='ganado'||p.status==='perdido');
+  const won=res.filter(p=>p.status==='ganado');
+  const profit=res.reduce((a,p)=>p.status==='ganado'?a+(p.odds-1)*p.stake:a-p.stake,0);
+  const stk=res.reduce((a,p)=>a+p.stake,0);
+  document.getElementById('s-total').textContent=S.picks.length;
+  document.getElementById('s-wr').textContent=res.length?((won.length/res.length)*100).toFixed(1)+'%':'—';
+  const pe=document.getElementById('s-profit');
+  pe.textContent=(profit>=0?'+':'')+profit.toFixed(2);
+  pe.className='sc-val '+(profit>=0?'g':'r');
+  document.getElementById('s-roi').textContent=stk>0?((profit/stk)*100).toFixed(1)+'%':'—';
+}
+
+// ══════════════════════════════════════════
+//  PARLEYS
+// ══════════════════════════════════════════
+function renderParleys(){
+  const grid=document.getElementById('parleys-grid');
+  document.getElementById('parleys-cnt').textContent=S.parleys.length;
+  if(!S.parleys.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><div style="font-size:2.5rem;margin-bottom:.75rem">🔗</div><h3>Sin parleys</h3><p>Combina picks de alta confianza.</p></div>';return;}
+  grid.innerHTML=S.parleys.map(par=>{
+    const tot=par.legs.reduce((a,l)=>a*l.odds,1);
+    const pot=(tot*par.stake).toFixed(2);
+    return`<div class="card">
+      <div class="plh">
+        <div><div class="pl-title">${par.name}</div>
+          <div style="display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2)">${stbadge(par.status)}<span style="font-size:var(--text-xs);color:var(--faint)">📅 ${par.date}</span></div>
+        </div>
+        <div style="text-align:right"><div style="font-size:var(--text-xs);color:var(--faint)">Cuota total</div><div class="pl-odds">${tot.toFixed(2)}x</div></div>
+      </div>
+      <div class="pl-legs">
+        ${par.legs.map((l,i)=>`<div class="leg">
+          <div class="leg-num">${i+1}</div>
+          <div class="leg-info"><div class="leg-match">${l.match}</div><div class="leg-sel">${l.selection}</div></div>
+          <div class="leg-odds">${l.odds.toFixed(2)}</div>
+          <div class="leg-dot ${l.status}"></div>
+        </div>`).join('')}
+      </div>
+      <div class="plf">
+        <div class="pl-stake">Stake: <span>$${par.stake.toFixed(2)}</span></div>
+        <div class="pl-potential">Retorno: <span>$${pot}</span></div>
+      </div>
+      <div class="ra" style="padding:0 var(--s5) var(--s5)">
+        <button class="ra-btn w" onclick="setPLS(${par.id},'ganado')">✓ Ganado</button>
+        <button class="ra-btn l" onclick="setPLS(${par.id},'perdido')">✗ Perdido</button>
+        <button class="ra-btn v" onclick="setPLS(${par.id},'anulado')">Ø Anulado</button>
+        <button class="ra-btn reset" onclick="setPLS(${par.id},'pendiente')">↺ Pendiente</button>
+      </div>
+    </div>`;
+  }).join('');
+  updateParleyStats();
+}
+function setPLS(id,status){
+  S.parleys=S.parleys.map(p=>p.id===id?{...p,status,legs:p.legs.map(l=>({...l,status:status==='ganado'?'won':status==='perdido'?'lost':'pending'}))}:p);
+  save();refreshAll();
+}
+function updateParleyStats(){
+  const won=S.parleys.filter(p=>p.status==='ganado');
+  const best=S.parleys.reduce((m,p)=>{const o=p.legs.reduce((a,l)=>a*l.odds,1);return o>m?o:m;},0);
+  const profit=S.parleys.reduce((a,p)=>{const o=p.legs.reduce((acc,l)=>acc*l.odds,1);return p.status==='ganado'?a+(o-1)*p.stake:p.status==='perdido'?a-p.stake:a;},0);
+  document.getElementById('ps-total').textContent=S.parleys.length;
+  document.getElementById('ps-won').textContent=won.length;
+  document.getElementById('ps-best').textContent=best>0?best.toFixed(2)+'x':'—';
+  const pe=document.getElementById('ps-profit');
+  pe.textContent='$'+Math.abs(profit).toFixed(2);
+  pe.className='sc-val '+(profit>=0?'g':'r');
+}
+
+// ══════════════════════════════════════════
+//  RESULTADOS
+// ══════════════════════════════════════════
+function renderResults(){
+  const all=[
+    ...S.picks.filter(p=>p.status!=='pendiente').map(p=>({...p,type:'Pick',pl:p.status==='ganado'?(p.odds-1)*p.stake:-p.stake})),
+    ...S.parleys.filter(p=>p.status!=='pendiente').map(p=>{
+      const o=p.legs.reduce((a,l)=>a*l.odds,1);
+      return{...p,type:'Parley',match:p.name,odds:o,selection:p.legs.map(l=>l.selection).join(' + '),pl:p.status==='ganado'?(o-1)*p.stake:-p.stake};
+    })
+  ].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const tbody=document.getElementById('r-tbody');
+  const empty=document.getElementById('r-empty');
+  if(!all.length){tbody.innerHTML='';empty.style.display='flex';return;}
+  empty.style.display='none';
+  tbody.innerHTML=all.map(r=>`<tr>
+    <td style="color:var(--faint)">${r.date}</td>
+    <td>${r.match||r.name||'—'}</td>
+    <td><span style="font-size:var(--text-xs);font-weight:700;padding:2px var(--s2);background:var(--sur3);border-radius:var(--r-sm)">${r.type}</span></td>
+    <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.selection}</td>
+    <td class="tm" style="color:var(--pri)">${(r.odds||0).toFixed(2)}</td>
+    <td class="tm">$${(r.stake||0).toFixed(2)}</td>
+    <td class="tm" style="${r.pl>=0?'color:var(--green)':'color:var(--red)'}">${r.pl>=0?'+':''}$${r.pl.toFixed(2)}</td>
+    <td>${stbadge(r.status)}</td>
+  </tr>`).join('');
+  const won=all.filter(r=>r.status==='ganado');
+  const net=all.reduce((a,r)=>a+r.pl,0);
+  let best=0,cur=0;
+  [...all].reverse().forEach(r=>{if(r.status==='ganado'){cur++;best=Math.max(best,cur);}else cur=0;});
+  document.getElementById('r-pg').textContent=`${won.length}/${all.length}`;
+  document.getElementById('r-wr').textContent=all.length?((won.length/all.length)*100).toFixed(1)+'%':'—';
+  const ne=document.getElementById('r-net');
+  ne.textContent=(net>=0?'+':'')+'$'+net.toFixed(2);
+  ne.className='sc-val '+(net>=0?'g':'r');
+  document.getElementById('r-streak').textContent=best;
+}
+
+function renderChart(){
+  const svg=document.getElementById('chart-svg');
+  let bk=S.bankroll;
+  const res=S.picks.filter(p=>p.status!=='pendiente').sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const pts=[{x:0,y:bk}];
+  res.forEach((p,i)=>{bk+=p.status==='ganado'?(p.odds-1)*p.stake:-p.stake;pts.push({x:i+1,y:Math.max(bk,0)});});
+  if(pts.length<2){svg.innerHTML='<text x="400" y="90" text-anchor="middle" fill="var(--faint)" font-size="14">Sin datos suficientes</text>';return;}
+  const xs=pts.map(p=>p.x),ys=pts.map(p=>p.y);
+  const minX=Math.min(...xs),maxX=Math.max(...xs),minY=Math.min(...ys)*.97,maxY=Math.max(...ys)*1.03;
+  const toS=(x,y)=>[((x-minX)/(maxX-minX||1))*800,180-((y-minY)/(maxY-minY||1))*160-10];
+  const spts=pts.map(p=>toS(p.x,p.y));
+  const pathD='M'+spts.map(([x,y])=>`${x},${y}`).join('L');
+  const aD=pathD+`L${spts[spts.length-1][0]},180L${spts[0][0]},180Z`;
+  const isPos=pts[pts.length-1].y>=pts[0].y;
+  const col=isPos?'#6daa45':'#e05d6b';
+  const[lx,ly]=spts[spts.length-1];
+  svg.innerHTML=`<defs><linearGradient id="cg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${col}" stop-opacity=".25"/><stop offset="100%" stop-color="${col}" stop-opacity=".02"/></linearGradient></defs>
+  <path d="${aD}" fill="url(#cg)"/>
+  <path d="${pathD}" fill="none" stroke="${col}" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="${lx}" cy="${ly}" r="5" fill="${col}"/>`;
+}
+
+// ══════════════════════════════════════════
+//  ANÁLISIS IA
+// ══════════════════════════════════════════
+function setSport(sp){
+  S.sport=sp;
+  ['football','tennis','basketball'].forEach(s=>document.getElementById('sp-'+s).classList.toggle('active',s===sp));
+}
+function qs(text){document.getElementById('a-query').value=text;}
+
+const TPLS = {
+  football:{
+    picks:[
+      {title:'Pick conservador',market:'Doble oportunidad / Draw No Bet',odds:1.55,conf:4,angle:'ventaja de local, mejor forma reciente'},
+      {title:'Pick de valor',market:'Over 2.5 goles / Ambos marcan (BTTS)',odds:1.82,conf:3,angle:'altos xG, debilidades defensivas'},
+      {title:'Pick agresivo',market:'Hándicap asiático favorito -0.75',odds:2.05,conf:4,angle:'superioridad táctica y motivación competitiva'}
+    ],
+    parley:['Favorito o empate','Over 1.5 goles','Ambos equipos más de 3 tiros al arco']
+  },
+  tennis:{
+    picks:[
+      {title:'Pick conservador',market:'Ganador del partido (favorito)',odds:1.50,conf:4,angle:'mejor superficie, forma y servicio del torneo'},
+      {title:'Pick de valor',market:'Over 21.5 juegos totales',odds:1.90,conf:3,angle:'rival parejo, posible tie-break'},
+      {title:'Pick agresivo',market:'Hándicap de juegos -3.5 al favorito',odds:2.20,conf:4,angle:'diferencia técnica y resistencia física'}
+    ],
+    parley:['Favorito gana al menos 1 set','Over 9.5 juegos en 1er set','Más de 1.5 breaks totales']
+  },
+  basketball:{
+    picks:[
+      {title:'Pick conservador',market:'Moneyline local',odds:1.58,conf:4,angle:'mejor net rating, descanso y profundidad de banca'},
+      {title:'Pick de valor',market:'Over total puntos del partido',odds:1.87,conf:3,angle:'pace alto, eficiencia ofensiva reciente'},
+      {title:'Pick agresivo',market:'Hándicap -5.5 favorito',odds:2.00,conf:4,angle:'matchup favorable y ventaja en rebotes'}
+    ],
+    parley:['Favorito gana','Over alternativo de puntos','Equipo local más de 104.5 pts']
+  }
+};
+
+function generate(){
+  const query=(document.getElementById('a-query').value||'').trim();
+  const notes=(document.getElementById('a-notes').value||'').trim();
+  if(!query){alert('Escribe una liga o partido para analizar');return;}
+  const tpl=TPLS[S.sport];
+  const out=document.getElementById('a-output');
+  const sportLabel={football:'Fútbol',tennis:'Tenis',basketball:'Baloncesto'}[S.sport];
+  const cards=tpl.picks.map((p,i)=>{
+    const st=(S.bankroll*[0.01,0.02,0.03,0.04][p.conf-1]||S.bankroll*0.02).toFixed(2);
+    return`<div class="a-card">
+      <h4>${p.title}</h4>
+      <p><strong>Mercado:</strong> ${p.market}</p>
+      <p><strong>Argumento:</strong> Enfocado en ${p.angle}${notes?' · '+notes:''}.</p>
+      <p><strong>Cuota objetivo:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">${p.odds.toFixed(2)}</span> &nbsp;|&nbsp; <strong>Confianza:</strong> ${p.conf}/5 &nbsp;|&nbsp; <strong>Stake sugerido:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$${st}</span></p>
+      <div class="ra" style="margin-top:var(--s3)">
+        <button class="ra-btn w" onclick="addPick('${S.sport}','${esc(query)}','${esc(p.market)}',${p.odds},${p.conf},${st},'${esc(p.angle+(notes?' | '+notes:''))}')">➕ Agregar a Picks</button>
+      </div>
+    </div>`;
+  }).join('');
+  const totO=tpl.picks.reduce((a,p)=>a*p.odds,1);
+  const pSt=(S.bankroll*0.02).toFixed(2);
+  const parleyCard=`<div class="a-card a-card-highlight">
+    <h4>🔗 Parley sugerido — ${query} (${sportLabel})</h4>
+    <p><strong>Selecciones:</strong> ${tpl.parley.join(' · ')}</p>
+    <p><strong>Cuota estimada:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">${totO.toFixed(2)}x</span> &nbsp;|&nbsp; <strong>Stake sugerido:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$${pSt}</span></p>
+    <div class="ra" style="margin-top:var(--s3)">
+      <button class="ra-btn w" onclick="addParley('${esc(query)}','${S.sport}',${totO})">➕ Agregar a Parleys</button>
+    </div>
+  </div>`;
+  out.innerHTML=cards+parleyCard;
+}
+
+function addPick(sport,match,market,odds,conf,stake,analysis){
+  S.picks.unshift({id:Date.now()+Math.random()|0,sport,match,selection:market,odds:parseFloat(odds),stake:parseFloat(stake),status:'pendiente',date:new Date().toISOString().slice(0,10),analysis,confidence:conf});
+  save();refreshAll();go('picks');
+}
+function addParley(query,sport,totalOdds){
+  const sels=TPLS[sport].parley;
+  const perOdds=Math.pow(totalOdds,1/sels.length);
+  S.parleys.unshift({id:Date.now()+Math.random()|0,name:'Parley '+query,stake:parseFloat((S.bankroll*0.02).toFixed(2)),status:'pendiente',date:new Date().toISOString().slice(0,10),
+    legs:sels.map((s,i)=>({match:query,selection:s,odds:parseFloat(Math.max(1.20,perOdds+(i*0.02)).toFixed(2)),status:'pending'}))});
+  save();refreshAll();go('parleys');
+}
+
+// ══════════════════════════════════════════
+//  MODAL PICK
+// ══════════════════════════════════════════
+function openModal(t){
+  document.getElementById('modal-'+t).classList.add('open');
+  if(t==='parley'){S.legs=[];renderLegs();addLeg();}
+}
+function closeModal(t){document.getElementById('modal-'+t).classList.remove('open');}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+
+function setConf(n){
+  S.conf=n;
+  [1,2,3,4,5].forEach(i=>{
+    const el=document.getElementById('c'+i);
+    if(i<=n){el.style.color='var(--pri)';el.style.borderColor='var(--pri)';}
+    else{el.style.color='var(--muted)';el.style.borderColor='var(--brd)';}
+  });
+}
+function savePick(){
+  const match=document.getElementById('p-match').value.trim();
+  const sel=document.getElementById('p-sel').value.trim();
+  const odds=parseFloat(document.getElementById('p-odds').value);
+  const stake=parseFloat(document.getElementById('p-stake').value);
+  if(!match||!sel||isNaN(odds)||isNaN(stake)){alert('Completa todos los campos');return;}
+  S.picks.unshift({id:Date.now(),sport:document.getElementById('p-sport').value,match,selection:sel,odds,stake,status:'pendiente',date:document.getElementById('p-date').value||new Date().toISOString().slice(0,10),analysis:document.getElementById('p-note').value.trim(),confidence:S.conf});
+  save();closeModal('pick');
+  ['p-match','p-sel','p-odds','p-stake','p-note'].forEach(id=>document.getElementById(id).value='');
+  setConf(3);refreshAll();
+}
+
+// ══════════════════════════════════════════
+//  MODAL PARLEY
+// ══════════════════════════════════════════
+function addLeg(){if(S.legs.length>=5)return;S.legs.push({match:'',sel:'',odds:''});renderLegs();}
+function removeLeg(i){S.legs.splice(i,1);renderLegs();}
+function updateLeg(i,f,v){S.legs[i][f]=v;calcTot();}
+function renderLegs(){
+  document.getElementById('pl-legs').innerHTML=S.legs.map((l,i)=>`
+    <div style="background:var(--sur3);border:1px solid var(--brd);border-radius:var(--r-lg);padding:var(--s4);margin-bottom:var(--s3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s3)">
+        <span style="font-size:var(--text-xs);font-weight:700;color:var(--muted)">LEG ${i+1}</span>
+        ${S.legs.length>1?`<button type="button" onclick="removeLeg(${i})" style="font-size:var(--text-xs);color:var(--red)">✕</button>`:''}
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--s3)">
+        <input type="text" class="fc" placeholder="Partido" value="${esc(l.match)}" oninput="updateLeg(${i},'match',this.value)" style="font-size:var(--text-sm)">
+        <input type="text" class="fc" placeholder="Selección" value="${esc(l.sel)}" oninput="updateLeg(${i},'sel',this.value)" style="font-size:var(--text-sm)">
+        <input type="number" class="fc" placeholder="Cuota" value="${l.odds}" oninput="updateLeg(${i},'odds',this.value)" step="0.01" min="1.01" style="font-size:var(--text-sm)">
+      </div>
+    </div>`).join('');
+  calcTot();
+}
+function calcTot(){
+  const tot=S.legs.reduce((a,l)=>{const o=parseFloat(l.odds);return isNaN(o)?a:a*o;},1);
+  const has=S.legs.some(l=>!isNaN(parseFloat(l.odds)));
+  document.getElementById('pl-total').textContent=has?tot.toFixed(2)+'x':'—';
+}
+function saveParley(){
+  const name=document.getElementById('pl-name').value.trim()||'Parley '+new Date().toLocaleDateString('es');
+  const stake=parseFloat(document.getElementById('pl-stake').value);
+  if(isNaN(stake)||S.legs.length<2){alert('Necesitas al menos 2 selecciones y stake válido');return;}
+  S.parleys.unshift({id:Date.now(),name,stake,status:'pendiente',date:new Date().toISOString().slice(0,10),
+    legs:S.legs.map(l=>({match:l.match,selection:l.sel,odds:parseFloat(l.odds)||1.5,status:'pending'}))});
+  save();closeModal('parley');refreshAll();
+}
+
+// ══════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════
+document.getElementById('p-date').value=new Date().toISOString().slice(0,10);
+setConf(3);
+renderPicks();
+renderParleys();
+renderResults();
+renderBKInfo();
+updateBKDisplay();
+</script>
+</body>
+</html>
