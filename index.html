@@ -387,7 +387,7 @@ svg.profit-chart{width:100%;height:180px;}
         <label>Contexto adicional (opcional)</label>
         <textarea class="fc" id="a-notes" rows="3" placeholder="Ej: Quiero mercados conservadores, picks de valor, cuota entre 1.70 y 2.20..."></textarea>
       </div>
-      <button class="btn btn-pri" onclick="generate()" style="width:100%">
+      <button id="btn-generate" class="btn btn-pri" onclick="generate()" style="width:100%">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         Generar análisis
       </button>
@@ -904,6 +904,9 @@ async function generate(){
   if(!query){alert('Escribe una liga o partido para analizar');return;}
   if(!S.apiKey){alert('⚠️ Necesitas guardar tu API Key de Gemini en la configuración de arriba para usar el análisis real.');return;}
   
+  const btn = document.getElementById('btn-generate');
+  if(btn) { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'wait'; }
+  
   const out=document.getElementById('a-output');
   out.innerHTML='<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⏳</div><h3>Analizando con IA...</h3><p>Consultando a Gemini, esto puede tardar unos segundos.</p></div>';
   
@@ -972,6 +975,8 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown
   } catch (error) {
     console.error(error);
     out.innerHTML = `<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div><h3>Ocurrió un error</h3><p>${error.message}</p><p style="font-size:var(--text-xs);margin-top:var(--s2);color:var(--faint)">(Asegúrate de que el formato devuelto por la IA sea correcto y tu conexión esté bien)</p></div>`;
+  } finally {
+    if(btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
   }
 }
 
