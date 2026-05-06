@@ -262,6 +262,9 @@ svg.profit-chart{width:100%;height:180px;}
       <span class="chip-label">Bankroll</span>
       <span id="bk-display">$250.00</span>
     </div>
+    <button class="icon-btn" onclick="logout()" title="Cerrar sesión" id="logout-btn" style="display:none">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
     <button class="icon-btn" id="theme-btn" title="Cambiar tema">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
     </button>
@@ -553,61 +556,132 @@ svg.profit-chart{width:100%;height:180px;}
   </div>
 </div>
 
+<!-- MODAL AUTH -->
+<div class="overlay open" id="modal-auth" style="background:var(--bg)">
+  <div class="modal" role="dialog" aria-modal="true" style="max-width:400px;text-align:left">
+    <h2 id="auth-title">Iniciar Sesión</h2>
+    <div class="fg">
+      <label>Usuario</label>
+      <input type="text" class="fc" id="auth-user" placeholder="Tu nombre de usuario">
+    </div>
+    <div class="fg">
+      <label>Contraseña</label>
+      <input type="password" class="fc" id="auth-pass" placeholder="Tu contraseña">
+    </div>
+    <div id="auth-error" style="color:var(--red);font-size:var(--text-xs);margin-bottom:var(--s4);display:none"></div>
+    <div class="m-actions" style="justify-content:space-between;align-items:center">
+      <a href="#" style="font-size:var(--text-sm);color:var(--pri);text-decoration:none" onclick="toggleAuthMode();return false;" id="auth-toggle">¿No tienes cuenta? Regístrate</a>
+      <button class="btn btn-pri" id="auth-btn" onclick="submitAuth()">Entrar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════
-//  STATE + LOCALSTORAGE
+//  STATE + AUTH + API
 // ══════════════════════════════════════════
-const LS = {
-  get(k,d){try{const v=localStorage.getItem('betia_'+k);return v?JSON.parse(v):d;}catch{return d;}},
-  set(k,v){try{localStorage.setItem('betia_'+k,JSON.stringify(v));}catch{}}
-};
+const API_URL = 'http://127.0.0.1:8000';
+let token = localStorage.getItem('betia_token');
 
 let S = {
-  picks:    LS.get('picks',   []),
-  parleys:  LS.get('parleys', []),
-  bankroll: LS.get('bankroll',250),
-  apiKey:   LS.get('apiKey', ''),
-  sport:    'football',
-  conf:     3,
-  legs:     []
+  picks: [],
+  parleys: [],
+  bankroll: 250,
+  apiKey: localStorage.getItem('betia_apiKey') || '',
+  sport: 'football',
+  conf: 3,
+  legs: []
 };
 
-function save(){
-  LS.set('picks',   S.picks);
-  LS.set('parleys', S.parleys);
-  LS.set('bankroll',S.bankroll);
-  LS.set('apiKey',  S.apiKey);
+// Interceptor-like fetch
+async function apiFetch(endpoint, options = {}) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  const res = await fetch(API_URL + endpoint, { ...options, headers });
+  if (res.status === 401) {
+    logout();
+    throw new Error('No autorizado');
+  }
+  return res;
 }
 
 function saveApiKey() {
   const key = document.getElementById('api-key-input').value.trim();
   S.apiKey = key;
-  save();
+  localStorage.setItem('betia_apiKey', key);
   alert(key ? '✅ API Key de Gemini guardada exitosamente.' : '🗑️ API Key eliminada.');
 }
 
+async function loadData() {
+  try {
+    const pRes = await apiFetch('/api/picks');
+    S.picks = await pRes.json();
+    S.picks.sort((a,b)=>b.id-a.id);
+    const plRes = await apiFetch('/api/parleys');
+    S.parleys = await plRes.json();
+    S.parleys.sort((a,b)=>b.id-a.id);
+    const bRes = await apiFetch('/api/bankroll');
+    S.bankroll = (await bRes.json()).bankroll || 250;
+    refreshAll();
+  } catch (e) {
+    console.error('Error loading data', e);
+  }
+}
+
 // ══════════════════════════════════════════
-//  SEED (solo si no hay datos guardados)
+//  AUTH
 // ══════════════════════════════════════════
-if(!S.picks.length){
-  S.picks = [
-    {id:1,sport:'football',match:'Arsenal vs Chelsea',selection:'Arsenal gana',odds:2.10,stake:5,status:'ganado',date:'2026-04-28',analysis:'Arsenal en casa con 5 victorias seguidas. Chelsea sin Kane.',confidence:4},
-    {id:2,sport:'basketball',match:'Lakers vs Celtics',selection:'Over 215.5 pts',odds:1.85,stake:4,status:'perdido',date:'2026-04-29',analysis:'Alto ritmo ofensivo en ambos equipos.',confidence:3},
-    {id:3,sport:'football',match:'Real Madrid vs Barça',selection:'Ambos marcan',odds:1.65,stake:5,status:'ganado',date:'2026-04-30',analysis:'Clásico: ambos ataques en forma, pocas porterías a cero.',confidence:5},
-    {id:4,sport:'tennis',match:'Alcaraz vs Djokovic',selection:'Alcaraz gana',odds:2.30,stake:2.5,status:'pendiente',date:'2026-05-05',analysis:'Alcaraz dominante en tierra batida.',confidence:4},
-    {id:5,sport:'football',match:'Millonarios vs Nacional',selection:'Local gana',odds:1.90,stake:3,status:'pendiente',date:'2026-05-05',analysis:'Millonarios fuerte en el Campín.',confidence:3}
-  ];
-  S.parleys = [
-    {id:1,name:'Parley Express',stake:10,status:'ganado',date:'2026-04-28',legs:[
-      {match:'Arsenal vs Chelsea',selection:'Arsenal gana',odds:2.10,status:'won'},
-      {match:'Real Madrid vs Barça',selection:'Ambos marcan',odds:1.65,status:'won'}
-    ]},
-    {id:2,name:'NBA Double',stake:5,status:'perdido',date:'2026-04-29',legs:[
-      {match:'Lakers vs Celtics',selection:'Over 215.5',odds:1.85,status:'lost'},
-      {match:'Warriors vs Suns',selection:'Warriors gana',odds:1.70,status:'pending'}
-    ]}
-  ];
-  save();
+let isLoginMode = true;
+
+function toggleAuthMode() {
+  isLoginMode = !isLoginMode;
+  document.getElementById('auth-title').textContent = isLoginMode ? 'Iniciar Sesión' : 'Registrarse';
+  document.getElementById('auth-btn').textContent = isLoginMode ? 'Entrar' : 'Crear Cuenta';
+  document.getElementById('auth-toggle').textContent = isLoginMode ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión';
+  document.getElementById('auth-error').style.display = 'none';
+}
+
+async function submitAuth() {
+  const user = document.getElementById('auth-user').value.trim();
+  const pass = document.getElementById('auth-pass').value.trim();
+  const errEl = document.getElementById('auth-error');
+  if(!user || !pass) { errEl.textContent = 'Completa todos los campos'; errEl.style.display='block'; return; }
+  
+  try {
+    if (isLoginMode) {
+      const fd = new URLSearchParams();
+      fd.append('username', user);
+      fd.append('password', pass);
+      const res = await fetch(API_URL + '/token', { method: 'POST', body: fd, headers: {'Content-Type': 'application/x-www-form-urlencoded'} });
+      if (!res.ok) throw new Error('Credenciales incorrectas');
+      const data = await res.json();
+      token = data.access_token;
+      localStorage.setItem('betia_token', token);
+      S.bankroll = data.bankroll || 250;
+      document.getElementById('modal-auth').classList.remove('open');
+      document.getElementById('logout-btn').style.display = 'flex';
+      loadData();
+    } else {
+      const res = await fetch(API_URL + '/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({username:user, password:pass}) });
+      if (!res.ok) throw new Error('El usuario ya existe o error en registro');
+      alert('Registro exitoso, ahora puedes iniciar sesión.');
+      toggleAuthMode();
+    }
+  } catch(e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+function logout() {
+  token = null;
+  localStorage.removeItem('betia_token');
+  S.picks = []; S.parleys = [];
+  document.getElementById('modal-auth').classList.add('open');
+  document.getElementById('logout-btn').style.display = 'none';
+  document.getElementById('auth-user').value = '';
+  document.getElementById('auth-pass').value = '';
+  refreshAll();
 }
 
 // ══════════════════════════════════════════
@@ -630,23 +704,30 @@ function go(v){
 (function(){
   const btn=document.getElementById('theme-btn');
   const root=document.documentElement;
-  let t=LS.get('theme', matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');
+  let t=localStorage.getItem('betia_theme');
+  if(!t) t = matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';
   root.setAttribute('data-theme',t);
-  btn.addEventListener('click',()=>{t=t==='dark'?'light':'dark';root.setAttribute('data-theme',t);LS.set('theme',t);});
+  btn.addEventListener('click',()=>{t=t==='dark'?'light':'dark';root.setAttribute('data-theme',t);localStorage.setItem('betia_theme',t);});
 })();
 
 // ══════════════════════════════════════════
 //  BANKROLL
 // ══════════════════════════════════════════
-function saveBankroll(){
+async function saveBankroll(){
   const v=parseFloat(document.getElementById('bk-input').value);
   if(isNaN(v)||v<=0){alert('Bankroll inválido');return;}
-  S.bankroll=v; save(); updateBKDisplay(); renderBKInfo();
-  alert('✅ Bankroll guardado: $'+v.toFixed(2));
+  try {
+    await apiFetch(`/api/bankroll?amount=${v}`, {method: 'POST'});
+    S.bankroll=v; updateBKDisplay(); renderBKInfo();
+    alert('✅ Bankroll guardado: $'+v.toFixed(2));
+  } catch(e) { alert('Error: '+e.message); }
 }
-function setBK(v){
+async function setBK(v){
   document.getElementById('bk-input').value=v;
-  S.bankroll=v; save(); updateBKDisplay(); renderBKInfo();
+  try {
+    await apiFetch(`/api/bankroll?amount=${v}`, {method: 'POST'});
+    S.bankroll=v; updateBKDisplay(); renderBKInfo();
+  } catch(e) { alert('Error: '+e.message); }
 }
 function updateBKDisplay(){
   const net=S.picks.filter(p=>p.status!=='pendiente').reduce((a,p)=>
@@ -734,7 +815,16 @@ function renderPicks(){
   }).join('');
   updateStats();
 }
-function setPS(id,status){S.picks=S.picks.map(p=>p.id===id?{...p,status}:p);save();refreshAll();}
+async function setPS(id,status){
+  try {
+    await apiFetch(`/api/picks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({status})
+    });
+    S.picks=S.picks.map(p=>p.id===id?{...p,status}:p);
+    refreshAll();
+  } catch(e) { alert('Error: '+e.message); }
+}
 function updateStats(){
   const res=S.picks.filter(p=>p.status==='ganado'||p.status==='perdido');
   const won=res.filter(p=>p.status==='ganado');
@@ -787,9 +877,15 @@ function renderParleys(){
   }).join('');
   updateParleyStats();
 }
-function setPLS(id,status){
-  S.parleys=S.parleys.map(p=>p.id===id?{...p,status,legs:p.legs.map(l=>({...l,status:status==='ganado'?'won':status==='perdido'?'lost':'pending'}))}:p);
-  save();refreshAll();
+async function setPLS(id,status){
+  try {
+    await apiFetch(`/api/parleys/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify({status})
+    });
+    S.parleys=S.parleys.map(p=>p.id===id?{...p,status,legs:p.legs.map(l=>({...l,status:status==='ganado'?'won':status==='perdido'?'lost':'pending'}))}:p);
+    refreshAll();
+  } catch(e) { alert('Error: '+e.message); }
 }
 function updateParleyStats(){
   const won=S.parleys.filter(p=>p.status==='ganado');
@@ -980,11 +1076,19 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown
   }
 }
 
-function addPick(sport,match,market,odds,conf,stake,analysis){
-  S.picks.unshift({id:Date.now()+Math.random()|0,sport,match,selection:market,odds:parseFloat(odds),stake:parseFloat(stake),status:'pendiente',date:new Date().toISOString().slice(0,10),analysis,confidence:conf});
-  save();refreshAll();go('picks');
+async function addPick(sport,match,market,odds,conf,stake,analysis){
+  const pickData = {
+    sport, match, selection:market, odds:parseFloat(odds), stake:parseFloat(stake),
+    date:new Date().toISOString().slice(0,10), analysis, confidence:conf
+  };
+  try {
+    const res = await apiFetch('/api/picks', { method: 'POST', body: JSON.stringify(pickData) });
+    const saved = await res.json();
+    S.picks.unshift(saved);
+    refreshAll();go('picks');
+  } catch(e) { alert('Error: '+e.message); }
 }
-function addParley(query,sport,totalOdds,legsJson){
+async function addParley(query,sport,totalOdds,legsJson){
   let sels;
   if(legsJson) {
     try { sels = JSON.parse(decodeURIComponent(legsJson)); } catch(e) {}
@@ -992,9 +1096,17 @@ function addParley(query,sport,totalOdds,legsJson){
   if(!sels) sels = TPLS[sport]?.parley || ['Selección 1', 'Selección 2'];
   
   const perOdds=Math.pow(totalOdds,1/sels.length);
-  S.parleys.unshift({id:Date.now()+Math.random()|0,name:'Parley '+query,stake:parseFloat((S.bankroll*0.02).toFixed(2)),status:'pendiente',date:new Date().toISOString().slice(0,10),
-    legs:sels.map((s,i)=>({match:query,selection:s,odds:parseFloat(Math.max(1.20,perOdds+(i*0.02)).toFixed(2)),status:'pending'}))});
-  save();refreshAll();go('parleys');
+  const parleyData = {
+    name: 'Parley '+query,
+    stake: parseFloat((S.bankroll*0.02).toFixed(2)),
+    date: new Date().toISOString().slice(0,10),
+    legs: sels.map((s,i)=>({match:query, selection:s, odds:parseFloat(Math.max(1.20,perOdds+(i*0.02)).toFixed(2))}))
+  };
+  try {
+    await apiFetch('/api/parleys', { method: 'POST', body: JSON.stringify(parleyData) });
+    await loadData();
+    go('parleys');
+  } catch(e) { alert('Error: '+e.message); }
 }
 
 // ══════════════════════════════════════════
@@ -1015,16 +1127,35 @@ function setConf(n){
     else{el.style.color='var(--muted)';el.style.borderColor='var(--brd)';}
   });
 }
-function savePick(){
+async function savePick(){
   const match=document.getElementById('p-match').value.trim();
   const sel=document.getElementById('p-sel').value.trim();
   const odds=parseFloat(document.getElementById('p-odds').value);
   const stake=parseFloat(document.getElementById('p-stake').value);
   if(!match||!sel||isNaN(odds)||isNaN(stake)){alert('Completa todos los campos');return;}
-  S.picks.unshift({id:Date.now(),sport:document.getElementById('p-sport').value,match,selection:sel,odds,stake,status:'pendiente',date:document.getElementById('p-date').value||new Date().toISOString().slice(0,10),analysis:document.getElementById('p-note').value.trim(),confidence:S.conf});
-  save();closeModal('pick');
-  ['p-match','p-sel','p-odds','p-stake','p-note'].forEach(id=>document.getElementById(id).value='');
-  setConf(3);refreshAll();
+  
+  const pickData = {
+    sport:document.getElementById('p-sport').value,
+    match,
+    selection:sel,
+    odds,
+    stake,
+    date:document.getElementById('p-date').value||new Date().toISOString().slice(0,10),
+    analysis:document.getElementById('p-note').value.trim(),
+    confidence:S.conf
+  };
+  
+  try {
+    const res = await apiFetch('/api/picks', {
+      method: 'POST',
+      body: JSON.stringify(pickData)
+    });
+    const saved = await res.json();
+    S.picks.unshift(saved);
+    closeModal('pick');
+    ['p-match','p-sel','p-odds','p-stake','p-note'].forEach(id=>document.getElementById(id).value='');
+    setConf(3);refreshAll();
+  } catch(e) { alert('Error: '+e.message); }
 }
 
 // ══════════════════════════════════════════
@@ -1053,13 +1184,21 @@ function calcTot(){
   const has=S.legs.some(l=>!isNaN(parseFloat(l.odds)));
   document.getElementById('pl-total').textContent=has?tot.toFixed(2)+'x':'—';
 }
-function saveParley(){
+async function saveParley(){
   const name=document.getElementById('pl-name').value.trim()||'Parley '+new Date().toLocaleDateString('es');
   const stake=parseFloat(document.getElementById('pl-stake').value);
   if(isNaN(stake)||S.legs.length<2){alert('Necesitas al menos 2 selecciones y stake válido');return;}
-  S.parleys.unshift({id:Date.now(),name,stake,status:'pendiente',date:new Date().toISOString().slice(0,10),
-    legs:S.legs.map(l=>({match:l.match,selection:l.sel,odds:parseFloat(l.odds)||1.5,status:'pending'}))});
-  save();closeModal('parley');refreshAll();
+  
+  const parleyData = {
+    name, stake, date:new Date().toISOString().slice(0,10),
+    legs: S.legs.map(l=>({match:l.match, selection:l.sel, odds:parseFloat(l.odds)||1.5}))
+  };
+  
+  try {
+    await apiFetch('/api/parleys', { method: 'POST', body: JSON.stringify(parleyData) });
+    closeModal('parley');
+    await loadData();
+  } catch(e) { alert('Error: '+e.message); }
 }
 
 // ══════════════════════════════════════════
@@ -1068,11 +1207,15 @@ function saveParley(){
 document.getElementById('p-date').value=new Date().toISOString().slice(0,10);
 if(document.getElementById('api-key-input')) document.getElementById('api-key-input').value = S.apiKey;
 setConf(3);
-renderPicks();
-renderParleys();
-renderResults();
-renderBKInfo();
-updateBKDisplay();
+
+if (token) {
+  document.getElementById('modal-auth').classList.remove('open');
+  document.getElementById('logout-btn').style.display = 'flex';
+  loadData();
+} else {
+  // Solo renderiza UI sin datos si no hay token
+  refreshAll();
+}
 </script>
 </body>
 </html>
