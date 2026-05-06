@@ -239,7 +239,22 @@ svg.profit-chart{width:100%;height:180px;}
   .topbar{padding:0 var(--s4);}
   .bk-chip .chip-label{display:none;}
 }
+
+.md-content { font-size: var(--text-sm); line-height: 1.6; color: var(--txt); }
+.md-content h1, .md-content h2, .md-content h3 { color: var(--pri); margin-top: var(--s4); margin-bottom: var(--s2); font-weight: 700; }
+.md-content h1 { font-size: var(--text-lg); }
+.md-content h2 { font-size: var(--text-base); }
+.md-content h3 { font-size: var(--text-sm); text-transform: uppercase; letter-spacing: 0.05em; }
+.md-content p { margin-bottom: var(--s3); }
+.md-content ul, .md-content ol { margin-left: var(--s5); margin-bottom: var(--s3); }
+.md-content li { margin-bottom: var(--s1); }
+.md-content table { width: 100%; border-collapse: collapse; margin-bottom: var(--s4); font-size: var(--text-xs); }
+.md-content th { background: var(--sur3); padding: var(--s2); text-align: left; border: 1px solid var(--brd); color: var(--muted); }
+.md-content td { padding: var(--s2); border: 1px solid var(--brd); }
+.md-content strong { color: var(--pri); }
+.md-content blockquote { border-left: 3px solid var(--pri); padding-left: var(--s3); color: var(--muted); background: var(--sur2); }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 <div class="app">
@@ -967,32 +982,478 @@ function setSport(sp){
 }
 function qs(text){document.getElementById('a-query').value=text;}
 
-const TPLS = {
-  football:{
-    picks:[
-      {title:'Pick conservador',market:'Doble oportunidad / Draw No Bet',odds:1.55,conf:4,angle:'ventaja de local, mejor forma reciente'},
-      {title:'Pick de valor',market:'Over 2.5 goles / Ambos marcan (BTTS)',odds:1.82,conf:3,angle:'altos xG, debilidades defensivas'},
-      {title:'Pick agresivo',market:'Hándicap asiático favorito -0.75',odds:2.05,conf:4,angle:'superioridad táctica y motivación competitiva'}
-    ],
-    parley:['Favorito o empate','Over 1.5 goles','Ambos equipos más de 3 tiros al arco']
-  },
-  tennis:{
-    picks:[
-      {title:'Pick conservador',market:'Ganador del partido (favorito)',odds:1.50,conf:4,angle:'mejor superficie, forma y servicio del torneo'},
-      {title:'Pick de valor',market:'Over 21.5 juegos totales',odds:1.90,conf:3,angle:'rival parejo, posible tie-break'},
-      {title:'Pick agresivo',market:'Hándicap de juegos -3.5 al favorito',odds:2.20,conf:4,angle:'diferencia técnica y resistencia física'}
-    ],
-    parley:['Favorito gana al menos 1 set','Over 9.5 juegos en 1er set','Más de 1.5 breaks totales']
-  },
-  basketball:{
-    picks:[
-      {title:'Pick conservador',market:'Moneyline local',odds:1.58,conf:4,angle:'mejor net rating, descanso y profundidad de banca'},
-      {title:'Pick de valor',market:'Over total puntos del partido',odds:1.87,conf:3,angle:'pace alto, eficiencia ofensiva reciente'},
-      {title:'Pick agresivo',market:'Hándicap -5.5 favorito',odds:2.00,conf:4,angle:'matchup favorable y ventaja en rebotes'}
-    ],
-    parley:['Favorito gana','Over alternativo de puntos','Equipo local más de 104.5 pts']
-  }
-};
+
+const PROMPT_FUTBOL = `# HEAD OF BETTING PROFESIONAL - FRAMEWORK DE ANÁLISIS CUANTITATIVO
+
+Actúa como **Head of Betting profesional y trader cuantitativo de fútbol**. Tu objetivo es **identificar value bets (apuestas con valor esperado positivo EV+)** y proteger el bankroll mediante gestión disciplinada del riesgo.
+
+El usuario solo indicará: **Fecha + Liga(s) o partido específico**.
+
+Ejemplo de input:
+"16 marzo Premier League y LaLiga"
+"17 marzo Champions League"
+"Real Madrid vs Barcelona 18 marzo"
+
+---
+
+## REGLAS DE ANÁLISIS OBLIGATORIAS (SIEMPRE)
+
+Antes de cualquier pronóstico, analiza:
+
+**Forma reciente (últimos 5 partidos)**
+- Goles anotados/concedidos
+- xG y xGA promedio
+- Puntos por partido
+
+**Contexto competitivo**
+- Título / Europa / Descenso
+- Calendario (fatiga, rotaciones)
+- Motivación del partido
+
+**Estado del equipo**
+- Lesiones clave / sanciones
+- Alineaciones probables
+- Rendimiento local/visitante
+
+**Tendencias de mercado**
+- Over/Under goles (2.5)
+- Ambos anotan (BTTS)
+- Asian handicap
+- Draw no bet
+
+**Historial H2H** (solo si tácticamente relevante)
+
+---
+
+## DETECCIÓN DE VALUE BETS (OBLIGATORIO)
+
+Para cada pronóstico calcula:
+
+**Probabilidad implícita** = 1 / cuota × 100
+
+**Probabilidad estimada** = tu estimación basada en datos
+
+**Value** = Prob_Estimada − Prob_Implícita
+
+**Solo recomienda si Value > 0**
+
+---
+
+## MERCADOS PRIORITARIOS (orden de preferencia)
+
+1. Asian Handicap / Draw no Bet
+2. Over/Under 2.5 goles  
+3. Ambos anotan (BTTS)
+4. Doble oportunidad
+5. **Evita**: marcadores exactos, corners, tarjetas
+
+---
+
+## ESTRUCTURA DE SALIDA (ESTRICTA)
+
+### 1. TOP 3 PARTIDOS POR COMPETICIÓN
+
+Selecciona **solo los 3 partidos más relevantes** de cada liga.
+
+| Competición | Partido | Contexto (Qué se juegan) | Factor X (insight clave) |
+
+**Factor X ejemplos**:
+- "Local +1.2 xG superior últimos 5 partidos"
+- "Visitante 0 goles en 4/5 visitas"
+- "Defensa local colapsa vs contraataque"
+
+---
+
+### 2. MATRIZ DE PRONÓSTICOS CON VALUE
+
+**Máximo 5 picks totales**. Solo Verde/Amarillo.
+
+| Partido | Mercado | Pronóstico | Cuota Est. | Prob. Implícita | Prob. Estimada | Value | Semáforo | Justificación |
+
+**Semáforo**:
+- **Verde**: Value > 5% + datos sólidos
+- **Amarillo**: Value 2-5% o datos moderados  
+- **Rojo**: Value < 2% → NO incluir
+
+---
+
+### 3. PARLEYS ESTRATÉGICOS
+
+**No repetir selecciones de la Matriz**. Máximo correlación baja.
+
+**Parley Seguridad** (cuota total 1.80-2.20)
+Selecciones: [lista]
+Cuota total: X.XX
+Stake máximo: 2
+
+text
+
+**Parley Valor** (cuota total 3.00-4.50)  
+Selecciones: [lista]
+Cuota total: X.XX
+Stake máximo: 1
+
+text
+
+---
+
+### 4. PLAN DE INVERSIÓN PROFESIONAL
+
+**Bankroll**: 500,000 COP
+
+**Escala de Stake**:
+- Stake 1 = 5,000 COP (1%)
+- Stake 2 = 10,000 COP (2%)
+- Stake 3 = 15,000 COP (3%)
+- Stake 4 = 20,000 COP (4%)
+- Stake 5 = 25,000 COP (5%)
+
+**Reglas**:
+Picks Verde → Stake 3-5
+Picks Amarillo → Stake 2-3
+Parlays → Stake 1-2 máximo
+RIESGO TOTAL DÍA ≤ 25,000 COP (5%)
+
+text
+
+**Tabla final**:
+
+| Apuesta | Tipo | Stake | Monto COP | Cuota | Ganancia Potencial |
+|---------|------|-------|-----------|-------|------------------|
+
+---
+
+## FILTROS DE NO-APUESTA (CRÍTICOS)
+
+**NO recomiendes si**:
+
+1. Value ≤ 0 (mercado bien ajustado)
+2. Falta información clave (lesiones, alineaciones)
+3. Rotaciones masivas probables
+4. Partido sin relevancia competitiva
+5. Alta incertidumbre (clima extremo, etc.)
+
+**En estos casos escribe**:
+"NO APUESTA - Falta value estadístico o información insuficiente"
+
+text
+
+---
+
+## DETECCIÓN DE TRAMPAS DE CUOTAS
+
+Señala si detectas:
+
+⚠️ POSIBLE TRAMPA: [equipo popular] cuota alta sin soporte estadístico
+→ Reducir stake o evitar
+
+text
+
+---
+
+## PRINCIPIOS FINALES
+
+1. **Objetividad absoluta**: datos > intuición
+2. **Máximo 5 picks simples + 2 parlays**
+3. **Siempre calcular y mostrar VALUE**
+4. **Proteger bankroll > acertar resultados**
+5. **Si no hay value → NO apostar**
+
+**Tu éxito se mide en EV+ a largo plazo, no en resultados diarios.**`;
+const PROMPT_NBA = `# HEAD OF BETTING NBA - ANÁLISIS ESTADÍSTICO JUGADORES + EQUIPOS
+
+Actúa como **Head of Betting profesional NBA** especializado en **value betting, props de jugadores y análisis estadístico avanzado**. 
+
+Tu objetivo es **identificar apuestas con valor esperado positivo (EV+)** analizando estadísticas de jugadores (puntos, rebotes, asistencias) y tendencias de equipos.
+
+El usuario solo indicará: **Fecha + Equipo(s) o conferencia específica**.
+
+Ejemplo de input:
+"15 marzo Eastern Conference"
+"16 marzo Lakers vs Celtics" 
+"NBA 17 marzo"
+
+---
+
+## REGLAS DE ANÁLISIS OBLIGATORIAS (SIEMPRE)
+
+**Estadísticas de equipo (últimos 7 partidos)**:
+- Puntos por partido (PPG)
+- Pace (posesiones por partido)
+- Offensive Rating (ORTG) / Defensive Rating (DRTG)
+- Net Rating (diferencia ORTG-DRTG)
+- % victorias back-to-back
+- Rendimiento local/visitante
+
+**Estadísticas de jugadores clave (últimos 5 partidos)**:
+- Puntos, rebotes, asistencias (PRA)
+- Tiros libres intentados (%FT)
+- Minutos por partido
+- Shooting splits (2PT%, 3PT%)
+- Uso (usage rate)
+- +/- por minuto
+
+**Contexto del partido**:
+- Back-to-back / descanso
+- Calendario (juegos consecutivos)
+- Lesiones reportadas
+- Motivación (playoffs/play-in)
+
+**Tendencias matchup**:
+- Defensa rival vs posición del jugador
+- Pace combinado (over/under puntos totales)
+- Rebotes ofensivos permitidos
+
+---
+
+## DETECCIÓN DE VALUE BETS (OBLIGATORIO)
+
+Para cada pronóstico:
+
+**Probabilidad implícita** = 1 / cuota × 100  
+**Probabilidad estimada** = basada en stats recientes + matchup  
+**Value** = Prob_Estimada − Prob_Implícita
+
+**Solo recomienda si Value > 0**
+
+---
+
+## MERCADOS NBA PRIORITARIOS (orden preferencia)
+
+**Props Jugadores**:
+1. Puntos sobre/subrayado
+2. Rebotes totales
+3. Asistencias
+4. PRA combinado (puntos+rebotes+asistencias)
+5. Tiros libres intentados
+
+**Equipos**:
+6. Total puntos (over/under)
+7. Spread (handicap)
+8. Moneyline (solo value claro)
+
+**Evita**: primeras canastas, puntos en cuarto específico
+
+---
+
+## ESTRUCTURA DE SALIDA (ESTRICTA)
+
+### 1. TOP 3 PARTIDOS DEL DÍA
+
+| Partido | Contexto | Factor X (insight clave) |
+
+**Factor X ejemplos**:
+- "Lakers permiten 14.2 rebotes ofensivos de PF"
+- "Embiid 42+ min en back-to-back"
+- "Celtics 118+ puntos vs pace > 100"
+
+---
+
+### 2. PLAYER PROPS CON VALUE (MÁXIMO 6)
+
+| Jugador | Estadística | Línea | Pronóstico | Cuota Est. | Prob. Implícita | Prob. Estimada | Value | Semáforo | Justificación | Equipo |
+
+**Semáforo**:
+- **Verde**: Value > 5% + matchup favorable
+- **Amarillo**: Value 2-5% o datos sólidos
+- **Rojo**: Value < 2% → NO incluir
+
+---
+
+### 3. TEAM BETS CON VALUE (MÁXIMO 3)
+
+| Partido | Mercado | Pronóstico | Cuota Est. | Prob. Implícita | Prob. Estimada | Value | Semáforo | Justificación |
+
+---
+
+### 4. PARLEYS NBA ESTRATÉGICOS
+
+**No repetir selecciones simples**. Correlación baja.
+
+**Parley Seguridad** (cuota total 1.80-2.20)
+Selecciones: [lista]
+Cuota total: X.XX
+Stake máximo: 2
+
+text
+
+**Parley Valor** (cuota total 3.00-4.50)
+Selecciones: [lista]
+Cuota total: X.XX
+Stake máximo: 1
+
+text
+
+---
+
+### 5. PLAN DE INVERSIÓN NBA
+
+**Bankroll**: 500,000 COP
+
+**Escala Stake NBA**:
+Player Props Verde → Stake 3-4
+Player Props Amarillo → Stake 2-3
+Team Bets → Stake 2-4
+Parlays → Stake 1 máximo
+RIESGO TOTAL DÍA ≤ 25,000 COP (5%)
+
+text
+
+**Tabla**:
+
+| Apuesta | Jugador,Equipo/Equipo | Stake | Monto COP | Cuota | Ganancia Potencial |
+|---------|----------------|-------|-----------|-------|-------------------|
+
+---
+
+## FILTROS NBA ESPECÍFICOS
+
+**NO recomiendes si**:
+
+1. **Back-to-back + lesión reciente** del jugador clave
+2. **Minutos reducidos** (<28 MPG últimos 3 juegos)
+3. **Defensa elite** vs posición (ej: Gobert vs centers)
+4. **Value ≤ 0** o datos insuficientes
+5. **Load management** probable (equipos top-4 conferencia)
+
+**Situaciones de bandera roja**:
+⚠️ LOAD MANAGEMENT: [jugador] probable DNQ
+⚠️ MINUTOS LIMITADOS: [jugador] <26 MPG recientes
+⚠️ MATCHUP DIFÍCIL: [defensa elite vs posición]
+
+text
+
+---
+
+## ANÁLISIS RÁPIDO JUGADORES (plantilla fija)
+
+Para cada prop jugador, analiza siempre:
+
+[Nombre] vs [rival] últimos 5 juegos:
+
+Promedio: X pts/reb/ast (desviación)
+
+Línea propuesta: X.5
+
+Matchup defensivo: [ranking defensa posición]
+
+Minutos proyectados: XX
+
+Value detectado: [+X%]
+
+text
+
+---
+
+## PRINCIPIOS NBA PROFESIONALES
+
+1. **Props > moneyline**: mayor estabilidad estadística
+2. **Pace alto = overs**: prioriza totales cuando pace combinado > 100
+3. **Rebotes ofensivos**: valor en segundos oportunidades
+4. **Back-to-back**: ajustar -15% stats principales
+5. **Estrellas cansadas**: evitar primeros props del día
+
+**Éxito = consistencia estadística > predicciones perfectas**`;
+const PROMPT_TENIS = `ROL Y CONTEXTO
+Actúa como un Head of Betting especializado en tenis, con enfoque 100% estadístico y acceso a web search para datos actualizados. Prioriza objetividad estadística sobre intuición.
+
+ENTRADA DEL USUARIO
+- Fecha: [DD/MM/AAAA]
+- Torneo(s): [ATP / WTA / Challenger / ITF / Jugador: X]
+- Superficie: [Dura / Arcilla / Hierba / Indoor]
+- Bankroll: 1.000.000 COP (salvo indicación distinta)
+
+PROCESO OBLIGATORIO
+Antes de analizar, valida:
+1. Partidos confirmados de la jornada y orden de juego oficial.
+2. Estado físico de cada jugador: lesiones, retiros recientes, fatiga y carga de partidos en la semana.
+3. Forma reciente en la superficie indicada (últimos 5 partidos).
+4. Head-to-head reciente (3–5 cruces), filtrando por superficie si existe.
+5. Contexto del torneo: ronda, ranking, puntos en juego y motivación.
+
+EXCLUSIONES
+- No incluyas partidos sin orden de juego confirmado.
+- Excluye jugadores con más de 3 horas de juego en las últimas 48 h.
+- Excluye partidos con historial reciente de retiros o alta incertidumbre física.
+
+FORMATO DE SALIDA
+
+1) RADAR DE CONTEXTO
+Párrafo breve (máx. 4 líneas) con:
+- Total de partidos disponibles.
+- Cuántos tienen alta incertidumbre.
+- Cuántos tienen valor real identificado.
+
+2) TOP 3 DEL DÍA — ANÁLISIS TÁCTICO
+
+|Torneo|Partido|Ronda|Superficie|Contexto|Factor X|Riesgo|
+|:-----|:------|:----|:---------|:-------|:-------|:-----|
+|      |       |     |          |        |        |Alto/Medio/Bajo|
+
+Criterios:
+- Mínimo 3 datos estadísticos verificables por partido.
+- Prioriza ventaja clara por superficie, H2H o mala forma del rival.
+
+3) MATRIZ DE PRONÓSTICOS Y VALOR
+
+|#|Partido|Mercado|Pronóstico|Cuota Est.|Valor Esperado|Semáforo|Justificación|
+|:-|:------|:------|:---------|:---------|:-------------|:-------|:------------|
+| | |Ganador / Hándicap / Total Games / Sets / Breaks| | |Alto/Medio/Bajo|🟢🟡🔴|Mín. 2 stats|
+
+Reglas:
+- Solo picks 🟢 o 🟡.
+- Cuota simple: 1.50 a 3.50.
+- Cada pick debe incluir forma en superficie + H2H + estado físico.
+- Máximo 6 picks simples.
+
+4) PARLEYS
+No repitas selecciones de la sección anterior.
+
+Parley A — Seguridad
+- Cuota objetivo: 1.80–2.20
+- Máximo 3 selecciones
+- Solo mercados conservadores.
+
+|Selección|Mercado|Cuota Parcial|
+|:--------|:------|:------------|
+
+Parley B — Valor
+- Cuota objetivo: 3.00–4.50
+- Máximo 4 selecciones
+- Puede incluir ganador directo o resultado en sets.
+
+|Selección|Mercado|Cuota Parcial|
+|:--------|:------|:------------|
+
+5) PLAN DE INVERSIÓN
+Bankroll: $1.000.000 COP
+Límite diario: 5% = $50.000 COP
+
+|#|Apuesta|Stake (1-10)|% Bankroll|Monto COP|Retorno Potencial|Tipo|
+|:-|:------|:-----------|:---------|:--------|:----------------|:---|
+
+Resumen:
+- Total arriesgado.
+- Retorno potencial total.
+- ROI estimado del día.
+
+Guía de stake:
+- 1–2: picks amarillos o parleys.
+- 3–4: picks verdes con cuota media.
+- 5+: solo picks verdes con múltiples confirmaciones.
+
+6) ALERTA DE RIESGOS
+Enumera 2–3 factores que puedan invalidar los pronósticos:
+- Cambios de orden de juego o condiciones climáticas.
+- Retiros/abandono por lesión.
+- Viento, calor extremo o presión por puntos/ranking.
+
+NOTAS FINALES
+- Si un partido no está confirmado o un jugador llega tocado, exclúyelo y explica por qué.
+- Indica siempre la fuente o base de cada dato relevante.
+- Si el riesgo diario del 5% se alcanza, reduce stakes en vez de omitir picks.
+- En tenis, la superficie pesa tanto como el ranking: filtra siempre por superficie.
+`;
 
 async function generate(){
   const query=(document.getElementById('a-query').value||'').trim();
@@ -1006,22 +1467,11 @@ async function generate(){
   const out=document.getElementById('a-output');
   out.innerHTML='<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⏳</div><h3>Analizando con IA...</h3><p>Consultando a Gemini, esto puede tardar unos segundos.</p></div>';
   
-  const sportLabel={football:'Fútbol',tennis:'Tenis',basketball:'Baloncesto'}[S.sport];
-  
-  const prompt = `Actúa como un experto analista de apuestas deportivas para ${sportLabel}.
-Analiza el siguiente evento o liga: "${query}".
-Contexto adicional del usuario: "${notes}".
+  let basePrompt = PROMPT_FUTBOL;
+  if(S.sport === 'basketball') basePrompt = PROMPT_NBA;
+  if(S.sport === 'tennis') basePrompt = PROMPT_TENIS;
 
-Genera 3 picks recomendados (Conservador, De valor, Agresivo) y 1 parley de 3 selecciones basándote en estadísticas reales y tu conocimiento.
-Responde ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown ni texto adicional, con esta estructura exacta:
-{
-  "picks": [
-    {"title": "Pick conservador", "market": "Nombre del mercado", "odds": 1.55, "conf": 4, "angle": "Breve análisis y argumento de 10-15 palabras"},
-    {"title": "Pick de valor", "market": "...", "odds": 2.10, "conf": 3, "angle": "..."},
-    {"title": "Pick agresivo", "market": "...", "odds": 3.50, "conf": 2, "angle": "..."}
-  ],
-  "parley": ["Selección 1", "Selección 2", "Selección 3"]
-}`;
+  const prompt = basePrompt + `\n\n=== INSTRUCCIONES DEL USUARIO ===\nAnaliza el siguiente evento o liga: "${query}".\nContexto adicional del usuario: "${notes}".\nBankroll actual del usuario: $${S.bankroll} COP. Ajusta las tablas de inversión a este bankroll.\n\n=== INSTRUCCIÓN DEL SISTEMA (HÍBRIDA) ===\n1. Genera TODO tu análisis utilizando el formato de salida y las tablas que se te pidieron en las instrucciones anteriores (usando Markdown).\n2. MUY IMPORTANTE: Inmediatamente después de terminar tu reporte en Markdown, DEBES agregar una línea separadora con el texto "---JSON---", seguida de un único bloque de código JSON válido que resuma los picks de la matriz y el parley.\nESTRUCTURA DEL JSON FINAL:\n{\n  "picks": [\n    {"title": "Pick conservador", "market": "Nombre del mercado", "odds": 1.55, "conf": 4, "angle": "Breve argumento"},\n    {"title": "Pick de valor", "market": "...", "odds": 2.10, "conf": 3, "angle": "..."}\n  ],\n  "parley": ["Selección 1", "Selección 2"]\n}\n`;
 
   try {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${S.apiKey}`, {
@@ -1031,46 +1481,76 @@ Responde ÚNICAMENTE con un objeto JSON válido, sin bloques de código markdown
     });
     
     if (!res.ok) {
-      if (res.status === 429) throw new Error('Demasiadas solicitudes (Error 429). Has alcanzado el límite de tu API Key gratuita. Por favor, espera un minuto e intenta de nuevo.');
-      throw new Error('Error en la API (' + res.status + '). Verifica que tu API Key sea correcta.');
+      if (res.status === 429) throw new Error('Demasiadas solicitudes (Error 429). Límite de API Key.');
+      throw new Error('Error en la API (' + res.status + ').');
     }
     const data = await res.json();
     let text = data.candidates[0].content.parts[0].text;
-    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
     
-    const result = JSON.parse(text);
+    let markdownPart = text;
+    let jsonPart = "";
     
-    const cards = result.picks.map((p,i)=>{
-      const st=(S.bankroll*[0.01,0.02,0.03,0.04][p.conf-1]||S.bankroll*0.02).toFixed(2);
-      return `<div class="a-card">
-        <h4>${p.title}</h4>
-        <p><strong>Mercado:</strong> ${p.market}</p>
-        <p><strong>Argumento:</strong> ${p.angle}</p>
-        <p><strong>Cuota:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">${Number(p.odds).toFixed(2)}</span> &nbsp;|&nbsp; <strong>Confianza:</strong> ${p.conf}/5 &nbsp;|&nbsp; <strong>Stake:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$${st}</span></p>
-        <div class="ra" style="margin-top:var(--s3)">
-          <button class="ra-btn w" onclick="addPick('${S.sport}','${esc(query)}','${esc(p.market)}',${p.odds},${p.conf},${st},'${esc(p.angle)}')">➕ Agregar a Picks</button>
-        </div>
-      </div>`;
-    }).join('');
+    if (text.includes('---JSON---')) {
+        const parts = text.split('---JSON---');
+        markdownPart = parts[0].trim();
+        jsonPart = parts[1].replace(/```json/gi, '').replace(/```/g, '').trim();
+    } else {
+        const jsonMatch = text.match(/```json\s*([\s\S]*?)\s*```$/i);
+        if(jsonMatch) {
+            jsonPart = jsonMatch[1];
+            markdownPart = text.replace(jsonMatch[0], '').trim();
+        }
+    }
     
-    const totO = result.picks.reduce((a,p)=>a*Number(p.odds), 1) * 0.8; // Estimado cuota parley
-    const pSt = (S.bankroll*0.02).toFixed(2);
-    const parleyLegsEnc = encodeURIComponent(JSON.stringify(result.parley));
-    
-    const parleyCard = `<div class="a-card a-card-highlight">
-      <h4>🔗 Parley sugerido — ${query} (${sportLabel})</h4>
-      <p><strong>Selecciones:</strong> ${result.parley.join(' · ')}</p>
-      <p><strong>Cuota estimada:</strong> <span style="color:var(--pri);font-family:var(--mono);font-weight:700">${totO.toFixed(2)}x</span> &nbsp;|&nbsp; <strong>Stake:</strong> <span style="color:var(--green);font-family:var(--mono);font-weight:700">$${pSt}</span></p>
-      <div class="ra" style="margin-top:var(--s3)">
-        <button class="ra-btn w" onclick="addParley('${esc(query)}','${S.sport}',${totO}, '${parleyLegsEnc}')">➕ Agregar a Parleys</button>
-      </div>
+    let finalHTML = `<div class="a-card md-content" style="background:var(--sur2); border:1px solid var(--brd); padding:var(--s6); border-radius:var(--r-xl)">
+        ${marked.parse(markdownPart)}
     </div>`;
+
+    if (jsonPart) {
+        try {
+            const result = JSON.parse(jsonPart);
+            
+            if (result.picks && result.picks.length > 0) {
+                finalHTML += `<div style="margin-top:var(--s5)"><h4 style="margin-bottom:var(--s3);color:var(--pri)">Acciones Rápidas</h4><div class="a-results">`;
+                finalHTML += result.picks.map((p,i)=>{
+                  const st=(S.bankroll*[0.01,0.02,0.03,0.04][p.conf-1]||S.bankroll*0.02).toFixed(2);
+                  return `<div class="a-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <strong>${p.title}</strong><br>
+                            <span style="font-size:var(--text-xs);color:var(--muted)">${p.market} | Cuota: ${Number(p.odds).toFixed(2)} | Stake: $${st}</span>
+                        </div>
+                        <button class="ra-btn w" onclick="addPick('${S.sport}','${esc(query)}','${esc(p.market)}',${p.odds},${p.conf},${st},'${esc(p.angle)}')">➕ Pick</button>
+                    </div>
+                  </div>`;
+                }).join('');
+                finalHTML += `</div></div>`;
+            }
+            
+            if (result.parley && result.parley.length > 0) {
+                const totO = result.picks ? result.picks.reduce((a,p)=>a*Number(p.odds), 1) * 0.8 : 3.0;
+                const pSt = (S.bankroll*0.02).toFixed(2);
+                const parleyLegsEnc = encodeURIComponent(JSON.stringify(result.parley));
+                finalHTML += `<div class="a-card a-card-highlight" style="margin-top:var(--s3)">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <div>
+                          <strong>Parley Sugerido</strong><br>
+                          <span style="font-size:var(--text-xs)">Cuota est: ${totO.toFixed(2)} | Stake: $${pSt}</span>
+                      </div>
+                      <button class="ra-btn w" onclick="addParley('${esc(query)}','${S.sport}',${totO}, '${parleyLegsEnc}')">➕ Parley</button>
+                  </div>
+                </div>`;
+            }
+        } catch (e) {
+            console.error("No se pudo parsear el JSON de la IA", e);
+        }
+    }
     
-    out.innerHTML = cards + parleyCard;
+    out.innerHTML = finalHTML;
     
   } catch (error) {
     console.error(error);
-    out.innerHTML = `<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div><h3>Ocurrió un error</h3><p>${error.message}</p><p style="font-size:var(--text-xs);margin-top:var(--s2);color:var(--faint)">(Asegúrate de que el formato devuelto por la IA sea correcto y tu conexión esté bien)</p></div>`;
+    out.innerHTML = `<div class="empty" style="padding:var(--s8) var(--s4)"><div style="font-size:2.5rem;margin-bottom:.75rem">⚠️</div><h3>Ocurrió un error</h3><p>${error.message}</p></div>`;
   } finally {
     if(btn) { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }
   }
